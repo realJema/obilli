@@ -37,7 +37,7 @@ export default function Reviews({ listingId, reviews, sellerId }: ReviewsProps) 
       const { error } = await supabase
         .from('reviews')
         .insert({
-          ad_id: listingId,
+          listing_id: listingId,
           seller_id: sellerId,
           rating,
           comment,

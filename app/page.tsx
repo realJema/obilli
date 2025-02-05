@@ -1,4 +1,3 @@
-import { Ad } from '@/types';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import ListingCard from '@/components/ListingCard';
@@ -150,6 +149,21 @@ async function getMainCategoriesWithListings() {
   return categoriesWithListings
 }
 
+function mapListingData(data: any) {
+  return {
+    id: data.id,
+    title: data.title,
+    description: data.description,
+    price: data.price,
+    currency: data.currency,
+    created_at: data.created_at,
+    categories: data.categories,
+    locations: data.locations,
+    listing_images: data.listing_images,
+    user: data.users  // Map users to user
+  }
+}
+
 export default async function Home() {
   const categoriesWithListings = await getMainCategoriesWithListings()
 
@@ -160,8 +174,14 @@ export default async function Home() {
           key={category.id}
           category={category.name}
           description={category.description}
-          listings={category.listings}
-        />
+        >
+          {category.listings.slice(0, 10).map((listing) => (
+            <ListingCard 
+              key={listing.id}
+              listing={mapListingData(listing)}
+            />
+          ))}
+        </CategorySection>
       ))}
     </div>
   )

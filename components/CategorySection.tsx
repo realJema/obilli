@@ -1,28 +1,31 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import ListingCard from './ListingCard'
-import { Listing } from '@/types'
+import React, { useState, useRef, useEffect } from 'react'
 
 interface CategorySectionProps {
   category: string
   description?: string
-  listings: Listing[]
+  children: React.ReactNode
 }
 
-export default function CategorySection({ category, description, listings }: CategorySectionProps) {
+export default function CategorySection({ 
+  category, 
+  description,
+  children 
+}: CategorySectionProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [showLeftScroll, setShowLeftScroll] = useState(false)
   const [showRightScroll, setShowRightScroll] = useState(true)
 
-  // Take only the first 10 listings
-  const displayListings = listings.slice(0, 10)
+  // Calculate item width based on container width
+  const itemWidth = 'calc(20% - 16px)' // 20% for 5 items, minus gap
 
   const scroll = (direction: 'left' | 'right') => {
     const container = scrollContainerRef.current
     if (!container) return
 
-    const scrollAmount = container.clientWidth * 0.8 // Scroll 80% of container width
+    // Scroll exactly 5 items
+    const scrollAmount = container.clientWidth
     const newScrollLeft = direction === 'left' 
       ? container.scrollLeft - scrollAmount 
       : container.scrollLeft + scrollAmount
@@ -31,16 +34,6 @@ export default function CategorySection({ category, description, listings }: Cat
       left: newScrollLeft,
       behavior: 'smooth'
     })
-
-    // Update scroll button visibility after animation
-    setTimeout(() => {
-      if (container) {
-        setShowLeftScroll(container.scrollLeft > 0)
-        setShowRightScroll(
-          container.scrollLeft < container.scrollWidth - container.clientWidth - 10
-        )
-      }
-    }, 300)
   }
 
   const handleScroll = () => {
@@ -49,16 +42,33 @@ export default function CategorySection({ category, description, listings }: Cat
 
     setShowLeftScroll(container.scrollLeft > 0)
     setShowRightScroll(
-      container.scrollLeft < container.scrollWidth - container.clientWidth - 10
+      container.scrollLeft < container.scrollWidth - container.clientWidth
     )
   }
+
+  // Check scroll buttons visibility on mount and resize
+  useEffect(() => {
+    const container = scrollContainerRef.current
+    if (container) {
+      setShowRightScroll(container.scrollWidth > container.clientWidth)
+    }
+
+    const handleResize = () => {
+      if (container) {
+        setShowRightScroll(container.scrollWidth > container.clientWidth)
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   return (
     <section className="relative px-4">
       <div className="mb-6">
         <h2 className="text-2xl font-bold">{category}</h2>
         {description && (
-          <p className="text-gray-500 mt-1">{description}</p>
+          <p className="text-gray-600 mt-1">{description}</p>
         )}
       </div>
 
@@ -68,6 +78,7 @@ export default function CategorySection({ category, description, listings }: Cat
           <button
             onClick={() => scroll('left')}
             className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 shadow-lg rounded-r-lg p-2 hover:bg-white"
+            aria-label="Scroll left"
           >
             <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -75,16 +86,17 @@ export default function CategorySection({ category, description, listings }: Cat
           </button>
         )}
 
-        {/* Listings container */}
+        {/* Content container */}
         <div
           ref={scrollContainerRef}
           onScroll={handleScroll}
-          className="flex overflow-x-auto gap-6 scroll-smooth scrollbar-hide"
+          className="flex overflow-x-auto gap-4 scroll-smooth scrollbar-hide"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {displayListings.map((listing) => (
-            <div key={listing.id} className="flex-none w-[280px]">
-              <ListingCard ad={listing} />
+          {/* Wrap children with fixed-width containers */}
+          {React.Children.map(children, (child) => (
+            <div style={{ width: itemWidth, flexShrink: 0 }}>
+              {child}
             </div>
           ))}
         </div>
@@ -94,6 +106,7 @@ export default function CategorySection({ category, description, listings }: Cat
           <button
             onClick={() => scroll('right')}
             className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 shadow-lg rounded-l-lg p-2 hover:bg-white"
+            aria-label="Scroll right"
           >
             <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

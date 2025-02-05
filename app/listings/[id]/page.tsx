@@ -91,7 +91,7 @@ async function getListingReviews(listingId: string) {
         profile_picture
       )
     `)
-    .eq('ad_id', listingId)
+    .eq('listing_id', listingId)
     .order('created_at', { ascending: false })
 
   if (error) {

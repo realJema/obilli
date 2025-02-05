@@ -5,17 +5,17 @@ import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 
 interface ListingCardProps {
-  ad: {
+  listing: {
     id: number
-    title: string
-    description: string
-    price: number | null
-    currency: string
-    created_at: string
-    categories: { name: string }
-    locations: { name: string }
-    listing_images: { image_url: string }[]
-    user: {
+    title?: string
+    description?: string
+    price?: number | null
+    currency?: string
+    created_at?: string
+    categories?: { name: string }
+    locations?: { name: string }
+    listing_images?: { image_url: string }[]
+    user?: {
       name: string
       role: string
       profile_picture?: string
@@ -23,35 +23,43 @@ interface ListingCardProps {
   }
 }
 
-export default function ListingCard({ ad }: ListingCardProps) {
-  const mainImage = ad.listing_images?.[0]?.image_url || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80'
+export default function ListingCard({ listing }: ListingCardProps) {
+  // Add safety check for listing_images
+  const mainImage = listing?.listing_images?.[0]?.image_url || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80'
   
   // Add safety check for date and customize the format
-  const timeAgo = ad.created_at 
-    ? formatDistanceToNow(new Date(ad.created_at), { 
+  const timeAgo = listing?.created_at 
+    ? formatDistanceToNow(new Date(listing.created_at), { 
         addSuffix: true,
         includeSeconds: false,
-      }).replace('about ', '')  // Remove 'about' from the string
-      .replace('less than a minute ago', 'just now') // Simplify recent times
+      }).replace('about ', '')
+      .replace('less than a minute ago', 'just now')
     : 'Recently'
 
-  // Add safety check for user data and use a more reliable default avatar
-  const user = ad.user || {
+  // Add safety check for user data
+  const user = listing?.user || {
     name: 'Anonymous',
     role: 'user',
     profile_picture: 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'
   }
 
-  // Use a reliable default avatar URL
   const defaultAvatar = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'
 
+  // Add safety checks for category and location
+  const categoryName = listing?.categories?.name || 'Uncategorized'
+  const locationName = listing?.locations?.name || 'Location not specified'
+
+  if (!listing) {
+    return null // Or return a placeholder card
+  }
+
   return (
-    <Link href={`/listings/${ad.id}`}>
+    <Link href={`/listings/${listing.id}`}>
       <div className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow h-[24rem] flex flex-col">
         <div className="relative h-40 flex-shrink-0">
           <Image
             src={mainImage}
-            alt={ad.title}
+            alt={listing.title || 'Listing Image'}
             fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -86,9 +94,9 @@ export default function ListingCard({ ad }: ListingCardProps) {
 
           {/* Title and description */}
           <div className="flex-grow">
-            <h2 className="text-base font-semibold mb-1 line-clamp-2">{ad.title}</h2>
+            <h2 className="text-base font-semibold mb-1 line-clamp-2">{listing.title || 'Untitled Listing'}</h2>
             <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-              {ad.description}
+              {listing.description || 'No description available'}
             </p>
           </div>
 
@@ -96,13 +104,13 @@ export default function ListingCard({ ad }: ListingCardProps) {
           <div className="mt-auto">
             {/* Price */}
             <p className="text-lg font-bold text-green-600 mb-1">
-              {ad.price ? `${ad.currency} ${ad.price.toLocaleString()}` : 'Contact for price'}
+              {listing.price ? `${listing.currency} ${listing.price.toLocaleString()}` : 'Contact for price'}
             </p>
 
             {/* Category and location */}
             <div className="text-xs text-gray-600">
-              <p className="truncate">{ad.categories.name}</p>
-              <p className="truncate">{ad.locations.name}</p>
+              <p className="truncate">{categoryName}</p>
+              <p className="truncate">{locationName}</p>
             </div>
           </div>
         </div>

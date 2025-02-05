@@ -135,13 +135,14 @@ export default function CategoryMenu({ categories }: CategoryMenuProps) {
               onMouseEnter={() => setOpenDropdown(category.id)}
               onMouseLeave={() => setOpenDropdown(null)}
             >
-              <button
-                className="px-3 py-2 text-gray-700 hover:text-blue-600 rounded-md inline-flex items-center whitespace-nowrap"
+              <Link
+                href={`/categories/${category.id}`}
+                className="px-3 py-2 text-gray-700 hover:text-blue-600 rounded-md inline-flex items-center whitespace-nowrap group"
               >
                 {category.name}
                 {subcategories.length > 0 && (
                   <svg
-                    className="w-4 h-4 ml-1"
+                    className="w-4 h-4 ml-1 group-hover:text-blue-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -154,7 +155,7 @@ export default function CategoryMenu({ categories }: CategoryMenuProps) {
                     />
                   </svg>
                 )}
-              </button>
+              </Link>
 
               {/* Mega Menu Dropdown */}
               {openDropdown === category.id && subcategories.length > 0 && (

@@ -41,8 +41,8 @@ CREATE TABLE locations (
     CHECK (type IN ('country', 'region', 'city', 'other'))
 );
 
--- 4. Listings (Ads) Table
-CREATE TABLE ads (
+-- 4. Listings (listings) Table
+CREATE TABLE listings (
     id SERIAL PRIMARY KEY,
     user_id INT NOT NULL,
     category_id INT NOT NULL,
@@ -55,9 +55,9 @@ CREATE TABLE ads (
     views_count INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_ads_user FOREIGN KEY (user_id) REFERENCES users(id),
-    CONSTRAINT fk_ads_category FOREIGN KEY (category_id) REFERENCES categories(id),
-    CONSTRAINT fk_ads_location FOREIGN KEY (location_id) REFERENCES locations(id),
+    CONSTRAINT fk_listings_user FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT fk_listings_category FOREIGN KEY (category_id) REFERENCES categories(id),
+    CONSTRAINT fk_listings_location FOREIGN KEY (location_id) REFERENCES locations(id),
     CHECK (status IN ('active','pending','expired','deleted'))
 );
 
@@ -65,51 +65,51 @@ CREATE TABLE ads (
 CREATE TABLE payments (
     id SERIAL PRIMARY KEY,
     user_id INT NOT NULL,
-    ad_id INT,
+    listing_id INT,
     amount DECIMAL(10,2) NOT NULL,
     payment_method VARCHAR(20) DEFAULT 'other',
     status VARCHAR(10) NOT NULL DEFAULT 'pending',
     transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_payments_user FOREIGN KEY (user_id) REFERENCES users(id),
-    CONSTRAINT fk_payments_ad FOREIGN KEY (ad_id) REFERENCES ads(id),
+    CONSTRAINT fk_payments_ad FOREIGN KEY (listing_id) REFERENCES listings(id),
     CHECK (payment_method IN ('mobile_money','paypal','other')),
     CHECK (status IN ('successful','pending','failed'))
 );
 
 -- 6. Sponsored Listings Table
-CREATE TABLE sponsored_ads (
+CREATE TABLE sponsored_listings (
     id SERIAL PRIMARY KEY,
-    ad_id INT NOT NULL,
+    listing_id INT NOT NULL,
     user_id INT NOT NULL,
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
     payment_id INT,
     status VARCHAR(10) NOT NULL DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_sponsored_ad_ad FOREIGN KEY (ad_id) REFERENCES ads(id),
+    CONSTRAINT fk_sponsored_ad_ad FOREIGN KEY (listing_id) REFERENCES listings(id),
     CONSTRAINT fk_sponsored_ad_user FOREIGN KEY (user_id) REFERENCES users(id),
     CONSTRAINT fk_sponsored_ad_payment FOREIGN KEY (payment_id) REFERENCES payments(id),
     CHECK (status IN ('active','expired'))
 );
 
 -- 7. Ad Images Table (multiple images per ad)
-CREATE TABLE ad_images (
+CREATE TABLE listing_images (
     id SERIAL PRIMARY KEY,
-    ad_id INT NOT NULL,
+    listing_id INT NOT NULL,
     image_url VARCHAR(255) NOT NULL,
     caption VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_image_ad FOREIGN KEY (ad_id) REFERENCES ads(id) ON DELETE CASCADE
+    CONSTRAINT fk_image_ad FOREIGN KEY (listing_id) REFERENCES listings(id) ON DELETE CASCADE
 );
 
--- 8. Favorites Table (users can save ads)
+-- 8. Favorites Table (users can save listings)
 CREATE TABLE favorites (
     id SERIAL PRIMARY KEY,
     user_id INT NOT NULL,
-    ad_id INT NOT NULL,
+    listing_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_favorite_user FOREIGN KEY (user_id) REFERENCES users(id),
-    CONSTRAINT fk_favorite_ad FOREIGN KEY (ad_id) REFERENCES ads(id)
+    CONSTRAINT fk_favorite_ad FOREIGN KEY (listing_id) REFERENCES listings(id)
 );
 
 -- 9. Messages Table (for internal conversations)
@@ -117,13 +117,13 @@ CREATE TABLE messages (
     id SERIAL PRIMARY KEY,
     sender_id INT NOT NULL,
     receiver_id INT NOT NULL,
-    ad_id INT,
+    listing_id INT,
     message_text TEXT NOT NULL,
     read_status VARCHAR(10) NOT NULL DEFAULT 'unread',
     sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_message_sender FOREIGN KEY (sender_id) REFERENCES users(id),
     CONSTRAINT fk_message_receiver FOREIGN KEY (receiver_id) REFERENCES users(id),
-    CONSTRAINT fk_message_ad FOREIGN KEY (ad_id) REFERENCES ads(id) ON DELETE CASCADE,
+    CONSTRAINT fk_message_ad FOREIGN KEY (listing_id) REFERENCES listings(id) ON DELETE CASCADE,
     CHECK (read_status IN ('read','unread'))
 );
 
@@ -140,17 +140,17 @@ CREATE TABLE reviews (
     CHECK (rating BETWEEN 1 AND 5)
 );
 
--- 11. Reports Table (for flagging ads or users)
+-- 11. Reports Table (for flagging listings or users)
 CREATE TABLE reports (
     id SERIAL PRIMARY KEY,
     reported_by INT NOT NULL,
-    ad_id INT,
+    listing_id INT,
     user_id INT,
     reason TEXT NOT NULL,
     status VARCHAR(10) NOT NULL DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_report_reporter FOREIGN KEY (reported_by) REFERENCES users(id),
-    CONSTRAINT fk_report_ad FOREIGN KEY (ad_id) REFERENCES ads(id) ON DELETE CASCADE,
+    CONSTRAINT fk_report_ad FOREIGN KEY (listing_id) REFERENCES listings(id) ON DELETE CASCADE,
     CONSTRAINT fk_report_user FOREIGN KEY (user_id) REFERENCES users(id),
     CHECK (status IN ('pending','resolved'))
 );
@@ -169,7 +169,7 @@ CREATE TABLE notifications (
 -- 13. Listing Images Table (multiple images per listing)
 CREATE TABLE listing_images (
     id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
-    listing_id BIGINT REFERENCES ads(id) ON DELETE CASCADE,
+    listing_id BIGINT REFERENCES listings(id) ON DELETE CASCADE,
     image_url TEXT NOT NULL,
     caption TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
