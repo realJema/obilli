@@ -86,3 +86,35 @@ export interface Notification {
   is_read: boolean;
   created_at: string;
 }
+
+export interface Listing {
+  id: number;
+  title: string;
+  description: string;
+  price: number;
+  currency: string;
+  category_id: number;
+  location_id: number;
+  user_id: number;
+  status: string;
+  views_count: number;
+  created_at: string;
+  updated_at: string;
+  categories: {
+    name: string;
+  };
+  locations: {
+    name: string;
+  };
+  listing_images: {
+    image_url: string;
+  }[];
+}
+
+export interface ListingImage {
+  id: number;
+  listing_id: number;
+  image_url: string;
+  caption?: string;
+  created_at: string;
+}

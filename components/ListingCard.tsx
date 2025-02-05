@@ -11,13 +11,13 @@ interface ListingCardProps {
     currency: string
     categories: { name: string }
     locations: { name: string }
-    ad_images: { image_url: string }[]
+    listing_images: { image_url: string }[]
   }
 }
 
 export default function ListingCard({ ad }: ListingCardProps) {
   // Use a reliable placeholder with correct CDN URL format
-  const mainImage = ad.ad_images?.[0]?.image_url || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80'
+  const mainImage = ad.listing_images?.[0]?.image_url || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80'
 
   return (
     <Link href={`/listings/${ad.id}`}>

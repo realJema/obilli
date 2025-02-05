@@ -20,15 +20,15 @@ async function getLatestAds(page = 1) {
   const from = (page - 1) * ITEMS_PER_PAGE
   const to = from + ITEMS_PER_PAGE - 1
 
-  // First, let's log the total count without any status filter
+  // First, let's log the total count
   const { count: totalCount } = await supabase
-    .from('ads')
+    .from('listings')
     .select('*', { count: 'exact', head: true })
 
-  console.log('Total ads in database:', totalCount)
+  console.log('Total listings in database:', totalCount)
 
-  const { data: ads, error, count } = await supabase
-    .from('ads')
+  const { data: listings, error, count } = await supabase
+    .from('listings')
     .select(`
       id,
       title,
@@ -41,7 +41,7 @@ async function getLatestAds(page = 1) {
       locations (
         name
       ),
-      ad_images (
+      listing_images (
         image_url
       ),
       status
@@ -50,21 +50,20 @@ async function getLatestAds(page = 1) {
     .range(from, to)
 
   if (error) {
-    console.error('Error fetching ads:', error)
+    console.error('Error fetching listings:', error)
     return { ads: [], totalPages: 0 }
   }
 
-  // Log the fetched ads to see their status
-  console.log('Fetched ads:', ads?.map(ad => ({
-    id: ad.id,
-    title: ad.title,
-    status: ad.status
+  console.log('Fetched listings:', listings?.map(listing => ({
+    id: listing.id,
+    title: listing.title,
+    status: listing.status
   })))
 
   const totalPages = Math.ceil((count || 0) / ITEMS_PER_PAGE)
 
   return {
-    ads: ads || [],
+    ads: listings || [], // Keep the name 'ads' for now to avoid changing the component props
     totalPages
   }
 }

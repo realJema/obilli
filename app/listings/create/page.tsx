@@ -138,9 +138,9 @@ export default function CreateListing() {
       try {
         for (const url of imageUrls) {
           const { error: imageError } = await supabase
-            .from('ad_images')
+            .from('listing_images')
             .insert({
-              ad_id: ad.id,
+              listing_id: ad.id,
               image_url: url,
               created_at: new Date().toISOString()
             })
@@ -156,7 +156,7 @@ export default function CreateListing() {
               hint: imageError.hint,
               code: imageError.code,
               url: url,
-              ad_id: ad.id
+              listing_id: ad.id
             })
 
             // Clean up the ad and storage
