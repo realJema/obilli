@@ -3,6 +3,7 @@ import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
 import './globals.css'
 import { supabase } from '@/lib/supabase'
+import { ThemeProvider } from '@/contexts/ThemeContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -33,15 +34,17 @@ export default async function RootLayout({
   const categories = await getCategories()
 
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <div className="min-h-screen flex flex-col">
-          <Navigation categories={categories} />
-          <main className="container mx-auto px-4 py-8 flex-grow">
-            {children}
-          </main>
-          <Footer categories={categories} />
-        </div>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.className} bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-all duration-300`}>
+        <ThemeProvider>
+          <div className="min-h-screen flex flex-col">
+            <Navigation categories={categories} />
+            <main className="container mx-auto px-4 py-8 flex-grow text-lg">
+              {children}
+            </main>
+            <Footer categories={categories} />
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   )

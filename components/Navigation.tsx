@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import CategoryMenu from './CategoryMenu';
+import { useRouter } from 'next/navigation';
+import ThemeToggle from './ThemeToggle';
 
 interface NavigationProps {
   categories: {
@@ -14,34 +16,57 @@ interface NavigationProps {
 }
 
 export default function Navigation({ categories }: NavigationProps) {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+    }
+  };
 
   return (
-    <header className="bg-white shadow-lg relative">
+    <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 relative">
       {/* Top Navigation Bar */}
       <div className="container mx-auto px-4 relative z-30">
-        <div className="flex justify-between items-center h-16">
-          <Link href="/" className="text-xl font-bold">
-            Classifieds
+        <div className="flex items-center justify-between h-20">
+          {/* Logo */}
+          <Link 
+            href="/" 
+            className="text-3xl font-bold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 transition-colors"
+          >
+            Obilli
           </Link>
 
-          {/* Desktop Search and Actions */}
-          <div className="hidden md:flex items-center space-x-4 flex-1 max-w-2xl mx-8">
-            <div className="relative flex-1">
-              <input
-                type="text"
-                placeholder="Search listings..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <button className="absolute right-3 top-2.5">
-                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+          {/* Search and Theme Toggle */}
+          <div className="flex-1 max-w-3xl mx-8">
+            <form onSubmit={handleSearch} className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search listings..."
+                  className="w-full px-4 py-3 text-lg rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 dark:focus:ring-brand-400"
+                />
+              </div>
+              <ThemeToggle />
+              <button
+                type="submit"
+                className="px-6 py-3 text-lg font-medium text-white bg-brand-600 hover:bg-brand-700 dark:bg-brand-500 dark:hover:bg-brand-600 rounded-lg transition-colors"
+              >
+                Search
               </button>
-            </div>
+            </form>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-4">
             <Link
-              href="/listings/create"
-              className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 whitespace-nowrap"
+              href="/post-ad"
+              className="px-6 py-3 text-lg font-medium text-white bg-brand-600 hover:bg-brand-700 dark:bg-brand-500 dark:hover:bg-brand-600 rounded-lg transition-colors"
             >
               Post Ad
             </Link>
@@ -84,8 +109,8 @@ export default function Navigation({ categories }: NavigationProps) {
                   </Link>
                 ))}
               <Link
-                href="/listings/create"
-                className="block px-3 py-2 text-center text-white bg-blue-500 rounded-md hover:bg-blue-600"
+                href="/post-ad"
+                className="block px-3 py-2 text-center text-white bg-brand-600 rounded-md hover:bg-brand-700"
               >
                 Post Ad
               </Link>

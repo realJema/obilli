@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import ListingCard from '@/components/ListingCard';
 import CategorySection from '@/components/CategorySection';
+import HeroSection from '@/components/HeroSection'
 
 function transformUnsplashUrl(url: string) {
   // Check if it's an Unsplash web URL
@@ -168,21 +169,24 @@ export default async function Home() {
   const categoriesWithListings = await getMainCategoriesWithListings()
 
   return (
-    <div className="space-y-12">
-      {categoriesWithListings.map((category) => (
-        <CategorySection 
-          key={category.id}
-          category={category.name}
-          description={category.description}
-        >
-          {category.listings.slice(0, 10).map((listing) => (
-            <ListingCard 
-              key={listing.id}
-              listing={mapListingData(listing)}
-            />
-          ))}
-        </CategorySection>
-      ))}
-    </div>
+    <>
+      <HeroSection />
+      <div className="space-y-12">
+        {categoriesWithListings.map((category) => (
+          <CategorySection 
+            key={category.id}
+            category={category.name}
+            description={category.description}
+          >
+            {category.listings.slice(0, 10).map((listing) => (
+              <ListingCard 
+                key={listing.id}
+                listing={mapListingData(listing)}
+              />
+            ))}
+          </CategorySection>
+        ))}
+      </div>
+    </>
   )
 }
