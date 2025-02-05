@@ -2,6 +2,7 @@ import { Ad } from '@/types';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import ListingCard from '@/components/ListingCard';
+import CategorySection from '@/components/CategorySection';
 
 function transformUnsplashUrl(url: string) {
   // Check if it's an Unsplash web URL
@@ -68,50 +69,100 @@ async function getLatestAds(page = 1) {
   }
 }
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: { page: string }
-}) {
-  const currentPage = Number(searchParams.page) || 1
-  const { ads, totalPages } = await getLatestAds(currentPage)
+async function getMainCategoriesWithListings() {
+  // Get main categories (those without parent_id)
+  const { data: mainCategories, error: categoryError } = await supabase
+    .from('categories')
+    .select('id, name, description')
+    .is('parent_id', null)
+    .limit(5)
+
+  if (categoryError) {
+    console.error('Error fetching categories:', categoryError)
+    return []
+  }
+
+  // For each main category, get its listings
+  const categoriesWithListings = await Promise.all(
+    mainCategories.map(async (category) => {
+      // First, get all subcategory IDs for this main category
+      const { data: subcategories } = await supabase
+        .from('categories')
+        .select('id')
+        .eq('parent_id', category.id)
+
+      // Create array of category IDs including main category and all its subcategories
+      const categoryIds = [category.id, ...(subcategories?.map(sub => sub.id) || [])]
+
+      // Get listings from main category and all its subcategories
+      const { data: listings, error: listingsError } = await supabase
+        .from('listings')
+        .select(`
+          id,
+          title,
+          description,
+          price,
+          currency,
+          created_at,
+          categories (
+            name
+          ),
+          locations (
+            name
+          ),
+          listing_images (
+            image_url
+          ),
+          users (
+            name,
+            role,
+            profile_picture
+          )
+        `)
+        .in('category_id', categoryIds)
+        .order('created_at', { ascending: false })
+        .limit(10)
+
+      if (listingsError) {
+        console.error(`Error fetching listings for category ${category.id}:`, listingsError)
+        return { ...category, listings: [] }
+      }
+
+      // Transform the data to match our expected format
+      const transformedListings = listings?.map(listing => ({
+        ...listing,
+        user: listing.users // Rename users to user
+      })) || []
+
+      // Log for debugging
+      console.log(`Category ${category.name}:`, {
+        categoryIds,
+        listingsCount: transformedListings?.length || 0
+      })
+
+      return {
+        ...category,
+        listings: transformedListings
+      }
+    })
+  )
+
+  return categoriesWithListings
+}
+
+export default async function Home() {
+  const categoriesWithListings = await getMainCategoriesWithListings()
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-8">Latest Listings</h1>
-      
-      {/* Grid of listings */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-        {ads.map((ad) => (
-          <ListingCard key={ad.id} ad={ad} />
-        ))}
-      </div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex justify-center space-x-2 my-8">
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-            <a
-              key={pageNum}
-              href={`/?page=${pageNum}`}
-              className={`px-4 py-2 rounded-lg ${
-                currentPage === pageNum
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 hover:bg-gray-200'
-              }`}
-            >
-              {pageNum}
-            </a>
-          ))}
-        </div>
-      )}
-
-      {/* No listings message */}
-      {ads.length === 0 && (
-        <div className="text-center text-gray-500 py-12">
-          No listings found. Be the first to post one!
-        </div>
-      )}
+    <div className="space-y-12">
+      {categoriesWithListings.map((category) => (
+        <CategorySection 
+          key={category.id}
+          category={category.name}
+          description={category.description}
+          listings={category.listings}
+        />
+      ))}
     </div>
   )
 }

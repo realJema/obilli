@@ -2,18 +2,16 @@
 const nextConfig = {
   images: {
     domains: [
-      'kkvwmbzcvsskgldsfveb.supabase.co',
       'images.unsplash.com',
-      'plus.unsplash.com'
+      'gravatar.com',
+      'www.gravatar.com',
+      'example.com',  // Replace with your actual image domain
+      'localhost',
+      'xsgames.co', // Common placeholder avatar domain
+      process.env.NEXT_PUBLIC_SUPABASE_URL?.replace('https://', '') || '', // For Supabase storage
     ],
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '*.supabase.co',
-        pathname: '/storage/v1/object/public/**',
-      }
-    ]
-  }
+    unoptimized: process.env.NODE_ENV === 'development',
+  },
 }
 
 module.exports = nextConfig 
