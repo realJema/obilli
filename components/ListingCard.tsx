@@ -16,10 +16,11 @@ interface ListingCardProps {
     categories?: { name: string }
     locations?: { name: string }
     listing_images?: { image_url: string }[]
-    user?: {
-      name: string
-      role: string
-      profile_picture?: string
+    users?: {
+      email: string
+      name: string | null
+      profile_picture: string | null
+      role: string | null
     }
   }
 }
@@ -38,7 +39,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
     : 'Recently'
 
   // Add safety check for user data
-  const user = listing?.user || {
+  const user = listing?.users || {
     name: 'Anonymous',
     role: 'user',
     profile_picture: DEFAULT_IMAGES.AVATAR

@@ -13,8 +13,12 @@ interface AuthModalProps {
 
 export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: AuthModalProps) {
   const [mode, setMode] = useState<'signin' | 'signup'>(initialMode)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    name: '',
+    role: 'buyer' as const
+  })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const { signIn, signUp } = useAuth()
@@ -30,29 +34,19 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: A
 
     try {
       if (mode === 'signin') {
-        await signIn(email, password)
+        await signIn(formData.email, formData.password)
       } else {
-        // Sign up and sign in the user
-        const { data, error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              name: null,
-              role: 'user'
-            }
-          }
+        await signUp(formData.email, formData.password, {
+          name: formData.name,
+          role: formData.role
         })
-
-        if (signUpError) throw signUpError
-
-        // If signup successful, sign in immediately
-        if (data?.user) {
-          await signIn(email, password)
-        }
       }
-      setEmail('')
-      setPassword('')
+      setFormData({
+        email: '',
+        password: '',
+        name: '',
+        role: 'buyer'
+      })
       onClose()
     } catch (err) {
       console.error('Auth error:', err)
@@ -99,8 +93,8 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: A
               <input
                 type="email"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={formData.email}
+                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 dark:bg-gray-800 dark:text-white"
               />
             </div>
@@ -112,11 +106,59 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: A
               <input
                 type="password"
                 required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={formData.password}
+                onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 dark:bg-gray-800 dark:text-white"
               />
             </div>
+
+            {mode === 'signup' && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 dark:bg-gray-800 dark:text-white"
+                    placeholder="Enter your name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    I want to
+                  </label>
+                  <div className="grid grid-cols-2 gap-4 mt-1">
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, role: 'buyer' }))}
+                      className={`px-4 py-2 rounded-lg border-2 transition-colors ${
+                        formData.role === 'buyer'
+                          ? 'border-brand-600 bg-brand-50 dark:bg-brand-900/20 text-brand-600'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-brand-600'
+                      }`}
+                    >
+                      Buy Items
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, role: 'seller' }))}
+                      className={`px-4 py-2 rounded-lg border-2 transition-colors ${
+                        formData.role === 'seller'
+                          ? 'border-brand-600 bg-brand-50 dark:bg-brand-900/20 text-brand-600'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-brand-600'
+                      }`}
+                    >
+                      Sell Items
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
 
             {error && (
               <p className="text-red-500 text-sm">{error}</p>

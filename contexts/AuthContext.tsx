@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import { createUserRecord } from '@/lib/auth-helpers'
 
 interface AuthContextType {
   user: User | null
@@ -25,9 +26,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user ?? null)
       router.refresh()
+
+      if (event === 'SIGNED_IN' && session?.user) {
+        try {
+          await createUserRecord(session.user)
+        } catch (error) {
+          console.error('Error creating user record:', error)
+        }
+      }
     })
 
     return () => {
@@ -44,12 +53,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signUp = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password
-    })
-    if (error) throw error
-    return data
+    try {
+      const { data: { user }, error } = await supabase.auth.signUp({
+        email,
+        password,
+      })
+
+      if (error) throw error
+
+      if (user) {
+        // Create record in users table
+        await createUserRecord(user)
+      }
+
+      return user
+    } catch (error) {
+      console.error('Error signing up:', error)
+      throw error
+    }
   }
 
   const signOut = async () => {
