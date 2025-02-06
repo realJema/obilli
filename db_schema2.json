@@ -1,0 +1,1437 @@
+[
+  {
+    "table_name": "users",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('users_id_seq'::regclass)",
+    "constraint_type": "PRIMARY KEY",
+    "foreign_table": "users",
+    "foreign_column": "id"
+  },
+  {
+    "table_name": "users",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('users_id_seq'::regclass)",
+    "constraint_type": "PRIMARY KEY",
+    "foreign_table": "users",
+    "foreign_column": "id"
+  },
+  {
+    "table_name": "users",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('users_id_seq'::regclass)",
+    "constraint_type": "PRIMARY KEY",
+    "foreign_table": "users",
+    "foreign_column": "id"
+  },
+  {
+    "table_name": "users",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('users_id_seq'::regclass)",
+    "constraint_type": "PRIMARY KEY",
+    "foreign_table": "users",
+    "foreign_column": "id"
+  },
+  {
+    "table_name": "users",
+    "column_name": "name",
+    "data_type": "character varying",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "email",
+    "data_type": "character varying",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "UNIQUE",
+    "foreign_table": "users",
+    "foreign_column": "email"
+  },
+  {
+    "table_name": "users",
+    "column_name": "phone",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": "UNIQUE",
+    "foreign_table": "users",
+    "foreign_column": "phone"
+  },
+  {
+    "table_name": "users",
+    "column_name": "phone",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": "UNIQUE",
+    "foreign_table": "users",
+    "foreign_column": "phone"
+  },
+  {
+    "table_name": "users",
+    "column_name": "phone",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": "UNIQUE",
+    "foreign_table": "users",
+    "foreign_column": "phone"
+  },
+  {
+    "table_name": "users",
+    "column_name": "phone",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": "UNIQUE",
+    "foreign_table": "users",
+    "foreign_column": "phone"
+  },
+  {
+    "table_name": "users",
+    "column_name": "password_hash",
+    "data_type": "character varying",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "profile_picture",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "role",
+    "data_type": "character varying",
+    "is_nullable": "NO",
+    "column_default": "'buyer'::character varying",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "CURRENT_TIMESTAMP",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "updated_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "CURRENT_TIMESTAMP",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "bio",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "instance_id",
+    "data_type": "uuid",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "PRIMARY KEY",
+    "foreign_table": "users",
+    "foreign_column": "id"
+  },
+  {
+    "table_name": "users",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "PRIMARY KEY",
+    "foreign_table": "users",
+    "foreign_column": "id"
+  },
+  {
+    "table_name": "users",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "PRIMARY KEY",
+    "foreign_table": "users",
+    "foreign_column": "id"
+  },
+  {
+    "table_name": "users",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "PRIMARY KEY",
+    "foreign_table": "users",
+    "foreign_column": "id"
+  },
+  {
+    "table_name": "users",
+    "column_name": "aud",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "role",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "email",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": "UNIQUE",
+    "foreign_table": "users",
+    "foreign_column": "email"
+  },
+  {
+    "table_name": "users",
+    "column_name": "encrypted_password",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "email_confirmed_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "invited_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "confirmation_token",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "confirmation_sent_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "recovery_token",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "recovery_sent_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "email_change_token_new",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "email_change",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "email_change_sent_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "last_sign_in_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "raw_app_meta_data",
+    "data_type": "jsonb",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "raw_user_meta_data",
+    "data_type": "jsonb",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "is_super_admin",
+    "data_type": "boolean",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "phone",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": "NULL::character varying",
+    "constraint_type": "UNIQUE",
+    "foreign_table": "users",
+    "foreign_column": "phone"
+  },
+  {
+    "table_name": "users",
+    "column_name": "phone",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": "NULL::character varying",
+    "constraint_type": "UNIQUE",
+    "foreign_table": "users",
+    "foreign_column": "phone"
+  },
+  {
+    "table_name": "users",
+    "column_name": "phone",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": "NULL::character varying",
+    "constraint_type": "UNIQUE",
+    "foreign_table": "users",
+    "foreign_column": "phone"
+  },
+  {
+    "table_name": "users",
+    "column_name": "phone",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": "NULL::character varying",
+    "constraint_type": "UNIQUE",
+    "foreign_table": "users",
+    "foreign_column": "phone"
+  },
+  {
+    "table_name": "users",
+    "column_name": "phone_confirmed_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "phone_change",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": "''::character varying",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "phone_change_token",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": "''::character varying",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "phone_change_sent_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "confirmed_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "email_change_token_current",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": "''::character varying",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "email_change_confirm_status",
+    "data_type": "smallint",
+    "is_nullable": "YES",
+    "column_default": "0",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "banned_until",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "reauthentication_token",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": "''::character varying",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "reauthentication_sent_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "is_sso_user",
+    "data_type": "boolean",
+    "is_nullable": "NO",
+    "column_default": "false",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "deleted_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "is_anonymous",
+    "data_type": "boolean",
+    "is_nullable": "NO",
+    "column_default": "false",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "name",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "bio",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "profile_picture",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  }
+]
+
+
+[
+  {
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('ads_id_seq'::regclass)",
+    "constraint_type": "PRIMARY KEY",
+    "foreign_table": "listings",
+    "foreign_column": "id"
+  },
+  {
+    "column_name": "user_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "FOREIGN KEY",
+    "foreign_table": "listings",
+    "foreign_column": "user_id"
+  },
+  {
+    "column_name": "category_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "FOREIGN KEY",
+    "foreign_table": "listings",
+    "foreign_column": "category_id"
+  },
+  {
+    "column_name": "location_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "FOREIGN KEY",
+    "foreign_table": "listings",
+    "foreign_column": "location_id"
+  },
+  {
+    "column_name": "title",
+    "data_type": "character varying",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "description",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "price",
+    "data_type": "numeric",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "currency",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": "'USD'::character varying",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "status",
+    "data_type": "character varying",
+    "is_nullable": "NO",
+    "column_default": "'pending'::character varying",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "views_count",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "CURRENT_TIMESTAMP",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "CURRENT_TIMESTAMP",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  }
+]
+
+[
+  {
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('ad_images_id_seq'::regclass)",
+    "constraint_type": "PRIMARY KEY",
+    "foreign_table": "listing_images",
+    "foreign_column": "id"
+  },
+  {
+    "column_name": "listing_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "FOREIGN KEY",
+    "foreign_table": "listing_images",
+    "foreign_column": "listing_id"
+  },
+  {
+    "column_name": "image_url",
+    "data_type": "character varying",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "caption",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "CURRENT_TIMESTAMP",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  }
+]
+
+[
+  {
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('reviews_id_seq'::regclass)",
+    "constraint_type": "PRIMARY KEY",
+    "foreign_table": "reviews",
+    "foreign_column": "id"
+  },
+  {
+    "column_name": "reviewer_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "FOREIGN KEY",
+    "foreign_table": "reviews",
+    "foreign_column": "reviewer_id"
+  },
+  {
+    "column_name": "seller_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "FOREIGN KEY",
+    "foreign_table": "reviews",
+    "foreign_column": "seller_id"
+  },
+  {
+    "column_name": "rating",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "comment",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "CURRENT_TIMESTAMP",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  }
+]
+
+[
+  {
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('favorites_id_seq'::regclass)",
+    "constraint_type": "PRIMARY KEY",
+    "foreign_table": "favorites",
+    "foreign_column": "id"
+  },
+  {
+    "column_name": "user_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "FOREIGN KEY",
+    "foreign_table": "favorites",
+    "foreign_column": "user_id"
+  },
+  {
+    "column_name": "ad_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "FOREIGN KEY",
+    "foreign_table": "favorites",
+    "foreign_column": "ad_id"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "CURRENT_TIMESTAMP",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  }
+]
+
+[
+  {
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('categories_id_seq'::regclass)",
+    "constraint_type": "PRIMARY KEY",
+    "foreign_table": "categories",
+    "foreign_column": "id"
+  },
+  {
+    "column_name": "name",
+    "data_type": "character varying",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "parent_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": "FOREIGN KEY",
+    "foreign_table": "categories",
+    "foreign_column": "parent_id"
+  },
+  {
+    "column_name": "description",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "CURRENT_TIMESTAMP",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "CURRENT_TIMESTAMP",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  }
+]
+
+[
+  {
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('locations_id_seq'::regclass)",
+    "constraint_type": "PRIMARY KEY",
+    "foreign_table": "locations",
+    "foreign_column": "id"
+  },
+  {
+    "column_name": "name",
+    "data_type": "character varying",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "parent_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": "FOREIGN KEY",
+    "foreign_table": "locations",
+    "foreign_column": "parent_id"
+  },
+  {
+    "column_name": "type",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": "'other'::character varying",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "CURRENT_TIMESTAMP",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "CURRENT_TIMESTAMP",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  }
+]
+
+[
+  {
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('messages_id_seq'::regclass)",
+    "constraint_type": "PRIMARY KEY",
+    "foreign_table": "messages",
+    "foreign_column": "id"
+  },
+  {
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('messages_id_seq'::regclass)",
+    "constraint_type": "PRIMARY KEY",
+    "foreign_table": "messages",
+    "foreign_column": "id"
+  },
+  {
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('messages_id_seq'::regclass)",
+    "constraint_type": "PRIMARY KEY",
+    "foreign_table": "messages",
+    "foreign_column": "id"
+  },
+  {
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('messages_id_seq'::regclass)",
+    "constraint_type": "PRIMARY KEY",
+    "foreign_table": "messages",
+    "foreign_column": "id"
+  },
+  {
+    "column_name": "sender_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "FOREIGN KEY",
+    "foreign_table": "messages",
+    "foreign_column": "sender_id"
+  },
+  {
+    "column_name": "receiver_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "FOREIGN KEY",
+    "foreign_table": "messages",
+    "foreign_column": "receiver_id"
+  },
+  {
+    "column_name": "ad_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": "FOREIGN KEY",
+    "foreign_table": "messages",
+    "foreign_column": "ad_id"
+  },
+  {
+    "column_name": "message_text",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "read_status",
+    "data_type": "character varying",
+    "is_nullable": "NO",
+    "column_default": "'unread'::character varying",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "sent_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "CURRENT_TIMESTAMP",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "topic",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "extension",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "payload",
+    "data_type": "jsonb",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "event",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "private",
+    "data_type": "boolean",
+    "is_nullable": "YES",
+    "column_default": "false",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "NO",
+    "column_default": "now()",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "inserted_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "NO",
+    "column_default": "now()",
+    "constraint_type": "PRIMARY KEY",
+    "foreign_table": "messages",
+    "foreign_column": "inserted_at"
+  },
+  {
+    "column_name": "inserted_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "NO",
+    "column_default": "now()",
+    "constraint_type": "PRIMARY KEY",
+    "foreign_table": "messages",
+    "foreign_column": "inserted_at"
+  },
+  {
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "gen_random_uuid()",
+    "constraint_type": "PRIMARY KEY",
+    "foreign_table": "messages",
+    "foreign_column": "id"
+  },
+  {
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "gen_random_uuid()",
+    "constraint_type": "PRIMARY KEY",
+    "foreign_table": "messages",
+    "foreign_column": "id"
+  },
+  {
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "gen_random_uuid()",
+    "constraint_type": "PRIMARY KEY",
+    "foreign_table": "messages",
+    "foreign_column": "id"
+  },
+  {
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "gen_random_uuid()",
+    "constraint_type": "PRIMARY KEY",
+    "foreign_table": "messages",
+    "foreign_column": "id"
+  }
+]
+
+[
+  {
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('notifications_id_seq'::regclass)",
+    "constraint_type": "PRIMARY KEY",
+    "foreign_table": "notifications",
+    "foreign_column": "id"
+  },
+  {
+    "column_name": "user_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "FOREIGN KEY",
+    "foreign_table": "notifications",
+    "foreign_column": "user_id"
+  },
+  {
+    "column_name": "message",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "type",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "is_read",
+    "data_type": "boolean",
+    "is_nullable": "YES",
+    "column_default": "false",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "CURRENT_TIMESTAMP",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  }
+]
+
+[
+  {
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('payments_id_seq'::regclass)",
+    "constraint_type": "PRIMARY KEY",
+    "foreign_table": "payments",
+    "foreign_column": "id"
+  },
+  {
+    "column_name": "user_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "FOREIGN KEY",
+    "foreign_table": "payments",
+    "foreign_column": "user_id"
+  },
+  {
+    "column_name": "ad_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": "FOREIGN KEY",
+    "foreign_table": "payments",
+    "foreign_column": "ad_id"
+  },
+  {
+    "column_name": "amount",
+    "data_type": "numeric",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "payment_method",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": "'other'::character varying",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "status",
+    "data_type": "character varying",
+    "is_nullable": "NO",
+    "column_default": "'pending'::character varying",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "transaction_date",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "CURRENT_TIMESTAMP",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  }
+]
+
+[
+  {
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('reports_id_seq'::regclass)",
+    "constraint_type": "PRIMARY KEY",
+    "foreign_table": "reports",
+    "foreign_column": "id"
+  },
+  {
+    "column_name": "reported_by",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "FOREIGN KEY",
+    "foreign_table": "reports",
+    "foreign_column": "reported_by"
+  },
+  {
+    "column_name": "ad_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": "FOREIGN KEY",
+    "foreign_table": "reports",
+    "foreign_column": "ad_id"
+  },
+  {
+    "column_name": "user_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": "FOREIGN KEY",
+    "foreign_table": "reports",
+    "foreign_column": "user_id"
+  },
+  {
+    "column_name": "reason",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "status",
+    "data_type": "character varying",
+    "is_nullable": "NO",
+    "column_default": "'pending'::character varying",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "CURRENT_TIMESTAMP",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  }
+]
+
+[
+  {
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('sponsored_ads_id_seq'::regclass)",
+    "constraint_type": "PRIMARY KEY",
+    "foreign_table": "sponsored_ads",
+    "foreign_column": "id"
+  },
+  {
+    "column_name": "ad_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "FOREIGN KEY",
+    "foreign_table": "sponsored_ads",
+    "foreign_column": "ad_id"
+  },
+  {
+    "column_name": "user_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "FOREIGN KEY",
+    "foreign_table": "sponsored_ads",
+    "foreign_column": "user_id"
+  },
+  {
+    "column_name": "start_date",
+    "data_type": "date",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "end_date",
+    "data_type": "date",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "payment_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": "FOREIGN KEY",
+    "foreign_table": "sponsored_ads",
+    "foreign_column": "payment_id"
+  },
+  {
+    "column_name": "status",
+    "data_type": "character varying",
+    "is_nullable": "NO",
+    "column_default": "'active'::character varying",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "CURRENT_TIMESTAMP",
+    "constraint_type": null,
+    "foreign_table": null,
+    "foreign_column": null
+  }
+]

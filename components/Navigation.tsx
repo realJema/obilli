@@ -5,6 +5,7 @@ import { useState } from 'react';
 import CategoryMenu from './CategoryMenu';
 import { useRouter } from 'next/navigation';
 import ThemeToggle from './ThemeToggle';
+import UserMenu from './UserMenu'
 
 interface NavigationProps {
   categories: {
@@ -70,6 +71,7 @@ export default function Navigation({ categories }: NavigationProps) {
             >
               Post Ad
             </Link>
+            <UserMenu />
           </div>
 
           {/* Mobile Menu Button */}
