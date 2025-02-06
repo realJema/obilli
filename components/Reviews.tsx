@@ -60,12 +60,12 @@ export default function Reviews({ listingId, reviews, sellerId }: ReviewsProps) 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg font-semibold">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
           Reviews ({reviews.length})
         </h3>
         <button
           onClick={() => setShowReviewForm(true)}
-          className="text-blue-500 hover:text-blue-600"
+          className="text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300"
         >
           Write a Review
         </button>
@@ -74,7 +74,7 @@ export default function Reviews({ listingId, reviews, sellerId }: ReviewsProps) 
       {reviews.length > 0 ? (
         <div className="space-y-6">
           {reviews.map((review) => (
-            <div key={review.id} className="border-b pb-6">
+            <div key={review.id} className="border-b dark:border-gray-700 pb-6">
               <div className="flex items-center mb-4">
                 <div className="relative w-10 h-10 rounded-full overflow-hidden mr-3">
                   <Image
@@ -85,8 +85,8 @@ export default function Reviews({ listingId, reviews, sellerId }: ReviewsProps) 
                   />
                 </div>
                 <div>
-                  <p className="font-medium">{review.reviewer.name}</p>
-                  <p className="text-sm text-gray-500">
+                  <p className="font-medium text-gray-900 dark:text-white">{review.reviewer.name}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     {formatDistanceToNow(new Date(review.created_at), { addSuffix: true })}
                   </p>
                 </div>
@@ -96,7 +96,7 @@ export default function Reviews({ listingId, reviews, sellerId }: ReviewsProps) 
                   <svg
                     key={i}
                     className={`w-5 h-5 ${
-                      i < review.rating ? 'text-yellow-400' : 'text-gray-300'
+                      i < review.rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'
                     }`}
                     fill="currentColor"
                     viewBox="0 0 20 20"
@@ -105,19 +105,19 @@ export default function Reviews({ listingId, reviews, sellerId }: ReviewsProps) 
                   </svg>
                 ))}
               </div>
-              <p className="text-gray-600">{review.comment}</p>
+              <p className="text-gray-600 dark:text-gray-300">{review.comment}</p>
             </div>
           ))}
         </div>
       ) : (
-        <p className="text-gray-500">No reviews yet. Be the first to review!</p>
+        <p className="text-gray-500 dark:text-gray-400">No reviews yet. Be the first to review!</p>
       )}
 
       {/* Review Form Modal */}
       {showReviewForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-lg font-semibold mb-4">Write a Review</h3>
+          <div className="bg-white dark:bg-gray-900 rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Write a Review</h3>
             <form onSubmit={handleSubmitReview}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -160,14 +160,14 @@ export default function Reviews({ listingId, reviews, sellerId }: ReviewsProps) 
                 <button
                   type="button"
                   onClick={() => setShowReviewForm(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 disabled:opacity-50"
+                  className="px-4 py-2 text-sm font-medium text-white bg-brand-600 dark:bg-brand-500 rounded-md hover:bg-brand-700 dark:hover:bg-brand-600 disabled:opacity-50"
                 >
                   {isSubmitting ? 'Submitting...' : 'Submit Review'}
                 </button>

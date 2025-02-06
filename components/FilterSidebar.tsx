@@ -37,28 +37,28 @@ export default function FilterSidebar({
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6">
+    <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
       {/* Price Range */}
       <div className="mb-8">
-        <h3 className="text-lg font-semibold mb-4">Price Range</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Price Range</h3>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-600 mb-1">Min Price</label>
+            <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Min Price</label>
             <input
               type="number"
               value={priceRange.min}
               onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
               placeholder="Min price"
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-600 mb-1">Max Price</label>
+            <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Max Price</label>
             <input
               type="number"
               value={priceRange.max}
               onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
               placeholder="Max price"
             />
           </div>
@@ -67,11 +67,11 @@ export default function FilterSidebar({
 
       {/* Location Filter */}
       <div className="mb-8">
-        <h3 className="text-lg font-semibold mb-4">Location</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Location</h3>
         <select
           value={selectedLocation}
           onChange={(e) => setSelectedLocation(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
         >
           <option value="">All Locations</option>
           {locations.map((location) => (
@@ -84,7 +84,7 @@ export default function FilterSidebar({
 
       {/* Date Filter */}
       <div className="mb-8">
-        <h3 className="text-lg font-semibold mb-4">Date Posted</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Date Posted</h3>
         <div className="space-y-2">
           {[
             { value: 'any', label: 'Any time' },
@@ -99,9 +99,9 @@ export default function FilterSidebar({
                 value={option.value}
                 checked={dateFilter === option.value}
                 onChange={(e) => setDateFilter(e.target.value)}
-                className="text-blue-600 focus:ring-blue-500 h-4 w-4"
+                className="text-brand-600 focus:ring-brand-500 h-4 w-4"
               />
-              <span className="ml-2 text-gray-700">{option.label}</span>
+              <span className="ml-2 text-gray-700 dark:text-gray-300">{option.label}</span>
             </label>
           ))}
         </div>
@@ -110,7 +110,7 @@ export default function FilterSidebar({
       {/* Apply Filters Button */}
       <button
         onClick={handleFilter}
-        className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+        className="w-full bg-brand-600 hover:bg-brand-700 dark:bg-brand-500 dark:hover:bg-brand-600 text-white px-4 py-2 rounded-lg transition-colors"
       >
         Apply Filters
       </button>

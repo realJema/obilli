@@ -109,9 +109,9 @@ export default function CategoryMenu({ categories }: CategoryMenuProps) {
       {showLeftCaret && (
         <button
           onClick={() => scroll('left')}
-          className="absolute left-0 z-20 h-full px-2 bg-gradient-to-r from-white via-white to-transparent"
+          className="absolute left-0 z-20 h-full px-2 bg-gradient-to-r from-white via-white to-transparent dark:from-gray-900 dark:via-gray-900"
         >
-          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
@@ -137,12 +137,12 @@ export default function CategoryMenu({ categories }: CategoryMenuProps) {
             >
               <Link
                 href={`/categories/${category.id}`}
-                className="px-3 py-2 text-gray-700 hover:text-blue-600 rounded-md inline-flex items-center whitespace-nowrap group"
+                className="px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-md inline-flex items-center whitespace-nowrap group"
               >
                 {category.name}
                 {subcategories.length > 0 && (
                   <svg
-                    className="w-4 h-4 ml-1 group-hover:text-blue-600"
+                    className="w-4 h-4 ml-1 group-hover:text-brand-600 dark:group-hover:text-brand-400"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -161,7 +161,7 @@ export default function CategoryMenu({ categories }: CategoryMenuProps) {
               {openDropdown === category.id && subcategories.length > 0 && (
                 <div 
                   ref={dropdownRef}
-                  className="fixed bg-white shadow-xl ring-1 ring-black ring-opacity-5 rounded-lg z-50"
+                  className="fixed bg-white dark:bg-gray-900 shadow-xl ring-1 ring-black ring-opacity-5 dark:ring-gray-700 rounded-lg z-50"
                   style={calculateDropdownPosition(category.id)}
                 >
                   <div className="p-8">
@@ -172,7 +172,7 @@ export default function CategoryMenu({ categories }: CategoryMenuProps) {
                           <div key={subcat.id} className="relative">
                             <Link
                               href={`/categories/${subcat.id}`}
-                              className="text-lg font-semibold text-gray-900 hover:text-blue-600 block mb-3"
+                              className="text-lg font-semibold text-gray-900 dark:text-white hover:text-brand-600 dark:hover:text-brand-400 block mb-3"
                             >
                               {subcat.name}
                             </Link>
@@ -182,7 +182,7 @@ export default function CategoryMenu({ categories }: CategoryMenuProps) {
                                   <li key={thirdCat.id}>
                                     <Link
                                       href={`/categories/${thirdCat.id}`}
-                                      className="text-base text-gray-600 hover:text-blue-600 block"
+                                      className="text-base text-gray-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 block"
                                     >
                                       {thirdCat.name}
                                     </Link>
@@ -206,9 +206,9 @@ export default function CategoryMenu({ categories }: CategoryMenuProps) {
       {showRightCaret && (
         <button
           onClick={() => scroll('right')}
-          className="absolute right-0 z-20 h-full px-2 bg-gradient-to-l from-white via-white to-transparent"
+          className="absolute right-0 z-20 h-full px-2 bg-gradient-to-l from-white via-white to-transparent dark:from-gray-900 dark:via-gray-900"
         >
-          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>

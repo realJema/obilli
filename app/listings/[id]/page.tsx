@@ -198,13 +198,13 @@ export default async function ListingDetails({
           </div>
 
           {/* Listing Details */}
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <h1 className="text-2xl font-bold mb-4">{listing.title}</h1>
-            <p className="text-gray-600 whitespace-pre-line">{listing.description}</p>
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{listing.title}</h1>
+            <p className="text-gray-600 dark:text-gray-300 whitespace-pre-line">{listing.description}</p>
           </div>
 
           {/* Reviews Section */}
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
             <Reviews 
               listingId={parseInt(params.id)}
               reviews={reviews}
@@ -216,14 +216,14 @@ export default async function ListingDetails({
         {/* Sidebar */}
         <div className="lg:col-span-1">
           {/* Price and Specifications Card */}
-          <div className="border border-gray-200 rounded-lg bg-white p-6 sticky top-4 divide-y divide-gray-200">
+          <div className="border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 p-6 sticky top-4 divide-y divide-gray-200 dark:divide-gray-700">
             {/* Price Section */}
             <div className="pb-6">
               <div className="space-y-2">
-                <div className="text-3xl font-bold text-green-600">
+                <div className="text-3xl font-bold text-brand-600 dark:text-brand-400">
                   {listing.price ? `${listing.currency} ${listing.price.toLocaleString()}` : 'Contact for price'}
                 </div>
-                <div className="flex items-center text-gray-500">
+                <div className="flex items-center text-gray-500 dark:text-gray-400">
                   <svg 
                     className="w-5 h-5 mr-2" 
                     fill="none" 
@@ -244,27 +244,27 @@ export default async function ListingDetails({
 
             {/* Specifications Section */}
             <div className="py-6">
-              <h3 className="text-lg font-semibold mb-4">Specifications</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Specifications</h3>
               <dl className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <dt className="text-gray-500">Category</dt>
-                  <dd className="font-medium text-gray-900">{listing.categories.name}</dd>
+                  <dt className="text-gray-500 dark:text-gray-400">Category</dt>
+                  <dd className="font-medium text-gray-900 dark:text-white">{listing.categories.name}</dd>
                 </div>
                 <div className="flex items-center justify-between">
-                  <dt className="text-gray-500">Location</dt>
-                  <dd className="font-medium text-gray-900">{listing.locations.name}</dd>
+                  <dt className="text-gray-500 dark:text-gray-400">Location</dt>
+                  <dd className="font-medium text-gray-900 dark:text-white">{listing.locations.name}</dd>
                 </div>
                 <div className="flex items-center justify-between">
-                  <dt className="text-gray-500">Listed</dt>
-                  <dd className="font-medium text-gray-900">{timeAgo}</dd>
+                  <dt className="text-gray-500 dark:text-gray-400">Listed</dt>
+                  <dd className="font-medium text-gray-900 dark:text-white">{timeAgo}</dd>
                 </div>
                 <div className="flex items-center justify-between">
-                  <dt className="text-gray-500">ID</dt>
-                  <dd className="font-medium text-gray-900">#{listing.id}</dd>
+                  <dt className="text-gray-500 dark:text-gray-400">ID</dt>
+                  <dd className="font-medium text-gray-900 dark:text-white">#{listing.id}</dd>
                 </div>
                 <div className="flex items-center justify-between">
-                  <dt className="text-gray-500">Status</dt>
-                  <dd className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  <dt className="text-gray-500 dark:text-gray-400">Status</dt>
+                  <dd className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-100 dark:bg-brand-900 text-brand-800 dark:text-brand-200">
                     {listing.status}
                   </dd>
                 </div>

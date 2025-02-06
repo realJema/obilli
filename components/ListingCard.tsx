@@ -103,7 +103,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
           {/* Footer info - always at bottom */}
           <div className="mt-auto">
             {/* Price */}
-            <p className="text-lg font-bold text-green-600 mb-1">
+            <p className="text-lg font-bold text-brand-600 dark:text-brand-400 mb-1">
               {listing.price ? `${listing.currency} ${listing.price.toLocaleString()}` : 'Contact for price'}
             </p>
 
