@@ -30,6 +30,11 @@ interface UserListing {
   listing_images: { image_url: string }[]
   categories: { name: string }
   locations: { name: string }
+  users: {
+    name: string
+    profile_picture: string | null
+    role: string
+  } | null
 }
 
 export default function ProfilePage() {
@@ -101,32 +106,52 @@ export default function ProfilePage() {
     if (!user) return
 
     try {
-      // Get user's listings
+      // First get the user's ID from the users table
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_user_id', user.id)
+        .single()
+
+      if (userError) throw userError
+
+      // Then get user's listings using the correct user_id
       const { data: listings, error: listingsError } = await supabase
         .from('listings')
         .select(`
           id,
           title,
+          description,
           price,
           currency,
           status,
           created_at,
-          listing_images (
-            image_url
-          ),
-          categories (
-            name
-          ),
-          locations (
-            name
+          listing_images (image_url),
+          categories (name),
+          locations (name),
+          users:user_id (
+            name,
+            profile_picture,
+            role
           )
         `)
-        .eq('user_id', user.id)
+        .eq('user_id', userData.id)
         .order('created_at', { ascending: false })
 
       if (listingsError) throw listingsError
 
-      setListings(listings || [])
+      // Transform the data to match the ListingCard expectations
+      const transformedListings = listings?.map(listing => ({
+        ...listing,
+        description: listing.description || 'No description available',
+        users: listing.users || {
+          name: user.user_metadata.name || user.email?.split('@')[0] || 'User',
+          profile_picture: user.user_metadata.profile_picture,
+          role: user.user_metadata.role || 'user'
+        }
+      })) || []
+
+      setListings(transformedListings)
     } catch (error) {
       console.error('Error loading profile:', error)
     } finally {

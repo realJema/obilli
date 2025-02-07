@@ -146,18 +146,34 @@ export default async function ListingDetails({
             <div className="flex items-center">
               <div className="mr-3">
                 <UserAvatar
-                  src={listing.users.profile_picture}
-                  alt={listing.users.name}
+                  src={listing.users?.profile_picture || DEFAULT_AVATAR}
+                  alt={listing.users?.name || 'User'}
                   size={48}
                 />
               </div>
               <div>
-                <p className="font-medium text-lg">{listing.users.name}</p>
-                <p className="text-gray-500 flex items-center">
-                  <span className="capitalize">{listing.users.role}</span>
-                  <span className="mx-2">•</span>
-                  <span>{timeAgo}</span>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  {listing.users?.name || 'User'}
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 capitalize">
+                  {listing.users?.role || 'Member'}
                 </p>
+              </div>
+              <div className="ml-auto flex items-center text-gray-500 dark:text-gray-400">
+                <svg 
+                  className="w-5 h-5 mr-1" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" 
+                  />
+                </svg>
+                <span className="font-medium">{timeAgo}</span>
               </div>
             </div>
             <button className="text-gray-400 hover:text-gray-600 flex items-center gap-2 text-sm font-medium">

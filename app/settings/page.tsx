@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'
 import Image from 'next/image'
 import { DEFAULT_IMAGES } from '@/lib/constants'
 import { useRouter } from 'next/navigation'
+import { processImage } from '@/lib/image-helpers'
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -48,67 +49,94 @@ export default function SettingsPage() {
     setMessage({ type: '', text: '' })
 
     try {
-      let profilePictureUrl = previewUrl
+      let profilePictureUrl = user.user_metadata.profile_picture || ''
 
       // Upload new profile image if selected
       if (profileImage) {
-        const fileExt = profileImage.name.split('.').pop()
-        const filePath = `${user.id}/${Date.now()}.${fileExt}`
+        try {
+          // Compress the image first
+          const processedImage = await processImage(profileImage)
+          
+          const fileExt = 'jpg' // We're converting all images to jpg in processImage
+          const filePath = `${user.id}/${Date.now()}.${fileExt}`
 
-        // Delete old profile image if exists
-        if (previewUrl && previewUrl.includes('profile_images')) {
-          const oldPath = previewUrl.split('/').pop()
-          if (oldPath) {
-            await supabase.storage
-              .from('profile_images')
-              .remove([`${user.id}/${oldPath}`])
+          // Delete old profile image if exists
+          if (profilePictureUrl && profilePictureUrl.includes('profile_images')) {
+            const oldPath = profilePictureUrl.split('/').pop()
+            if (oldPath) {
+              await supabase.storage
+                .from('profile_images')
+                .remove([`${user.id}/${oldPath}`])
+            }
           }
+
+          // Upload new image
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('profile_images')
+            .upload(filePath, processedImage, {
+              cacheControl: '3600',
+              upsert: true
+            })
+
+          if (uploadError) throw uploadError
+
+          // Get the public URL
+          const { data: { publicUrl } } = supabase.storage
+            .from('profile_images')
+            .getPublicUrl(filePath)
+
+          profilePictureUrl = publicUrl
+        } catch (error) {
+          console.error('Error processing/uploading image:', error)
+          throw error
         }
-
-        // Upload new image
-        const { error: uploadError, data } = await supabase.storage
-          .from('profile_images')
-          .upload(filePath, profileImage, {
-            cacheControl: '3600',
-            upsert: false
-          })
-
-        if (uploadError) throw uploadError
-
-        // Get the public URL
-        const { data: { publicUrl } } = supabase.storage
-          .from('profile_images')
-          .getPublicUrl(filePath)
-        
-        profilePictureUrl = publicUrl
       }
 
-      // Update user metadata
-      const { error: updateError } = await supabase.auth.updateUser({
-        data: {
+      // Get user record ID first
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_user_id', user.id)
+        .single()
+
+      if (userError) throw userError
+
+      // Update users table with the same profile picture URL
+      const { error: updateUserError } = await supabase
+        .from('users')
+        .update({
           name,
           phone,
           bio,
           profile_picture: profilePictureUrl,
           updated_at: new Date().toISOString()
+        })
+        .eq('auth_user_id', user.id)
+
+      if (updateUserError) throw updateUserError
+
+      // Update auth user metadata
+      const { error: updateAuthError } = await supabase.auth.updateUser({
+        data: {
+          name,
+          phone,
+          bio,
+          profile_picture: profilePictureUrl
         }
       })
 
-      if (updateError) throw updateError
+      if (updateAuthError) throw updateAuthError
 
-      // Force refresh user session to get updated metadata
-      const { data: { session }, error: refreshError } = await supabase.auth.refreshSession()
-      if (refreshError) throw refreshError
-      
-      if (session) {
-        // Verify the metadata was updated
-        console.log('Updated metadata:', session.user.user_metadata)
-        setMessage({ type: 'success', text: 'Profile updated successfully!' })
-        router.refresh()
-      }
+      setMessage({
+        type: 'success',
+        text: 'Profile updated successfully!'
+      })
     } catch (error) {
       console.error('Error updating profile:', error)
-      setMessage({ type: 'error', text: 'Failed to update profile. Please try again.' })
+      setMessage({
+        type: 'error',
+        text: 'Failed to update profile. Please try again.'
+      })
     } finally {
       setLoading(false)
     }

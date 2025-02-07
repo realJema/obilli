@@ -17,7 +17,7 @@ interface ListingCardProps {
     locations?: { name: string }
     listing_images?: { image_url: string }[]
     users?: {
-      email: string
+      id: string
       name: string | null
       profile_picture: string | null
       role: string | null
@@ -38,11 +38,11 @@ export default function ListingCard({ listing }: ListingCardProps) {
       .replace('less than a minute ago', 'just now')
     : 'Recently'
 
-  // Add safety check for user data
+  // Add safety check for user data with better fallbacks
   const user = listing?.users || {
     name: 'Anonymous',
-    role: 'user',
-    profile_picture: DEFAULT_IMAGES.AVATAR
+    profile_picture: DEFAULT_IMAGES.AVATAR,
+    role: 'user'
   }
 
   // Add safety checks for category and location
@@ -73,7 +73,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
               <div className="relative w-7 h-7 rounded-full overflow-hidden mr-2 bg-gray-100">
                 <Image
                   src={user.profile_picture || DEFAULT_IMAGES.AVATAR}
-                  alt={user.name}
+                  alt={user.name || 'User'}
                   fill
                   className="object-cover"
                   sizes="28px"
@@ -84,8 +84,12 @@ export default function ListingCard({ listing }: ListingCardProps) {
                 />
               </div>
               <div>
-                <p className="text-sm font-medium truncate max-w-[120px]">{user.name}</p>
-                <p className="text-xs text-gray-500 capitalize">{user.role}</p>
+                <p className="text-sm font-medium truncate max-w-[120px]">
+                  {user.name || 'Anonymous'}
+                </p>
+                <p className="text-xs text-gray-500 capitalize">
+                  {user.role || 'Member'}
+                </p>
               </div>
             </div>
             <span className="text-xs text-gray-500 flex-shrink-0">{timeAgo}</span>
@@ -93,7 +97,9 @@ export default function ListingCard({ listing }: ListingCardProps) {
 
           {/* Title and description */}
           <div className="flex-grow">
-            <h2 className="text-base font-semibold mb-1 line-clamp-2">{listing.title || 'Untitled Listing'}</h2>
+            <h2 className="text-base font-semibold mb-1 line-clamp-1">
+              {listing.title || 'Untitled Listing'}
+            </h2>
             <p className="text-sm text-gray-600 mb-2 line-clamp-2">
               {listing.description || 'No description available'}
             </p>

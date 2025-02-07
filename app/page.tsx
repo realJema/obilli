@@ -21,12 +21,9 @@ async function getLatestAds(page = 1) {
   const from = (page - 1) * ITEMS_PER_PAGE
   const to = from + ITEMS_PER_PAGE - 1
 
-  // First, let's log the total count
   const { count: totalCount } = await supabase
     .from('listings')
     .select('*', { count: 'exact', head: true })
-
-  console.log('Total listings in database:', totalCount)
 
   const { data: listings, error, count } = await supabase
     .from('listings')
@@ -36,16 +33,17 @@ async function getLatestAds(page = 1) {
       description,
       price,
       currency,
-      categories (
-        name
-      ),
-      locations (
-        name
-      ),
-      listing_images (
-        image_url
-      ),
-      status
+      status,
+      created_at,
+      categories (name),
+      locations (name),
+      listing_images (image_url),
+      users:user_id (
+        id,
+        name,
+        profile_picture,
+        role
+      )
     `, { count: 'exact' })
     .order('created_at', { ascending: false })
     .range(from, to)
@@ -55,44 +53,47 @@ async function getLatestAds(page = 1) {
     return { ads: [], totalPages: 0 }
   }
 
-  console.log('Fetched listings:', listings?.map(listing => ({
-    id: listing.id,
-    title: listing.title,
-    status: listing.status
-  })))
-
   const totalPages = Math.ceil((count || 0) / ITEMS_PER_PAGE)
 
+  // Transform the listings data
+  const transformedListings = listings?.map(listing => ({
+    ...listing,
+    users: {
+      id: listing.users?.id,
+      name: listing.users?.name || 'Anonymous',
+      profile_picture: listing.users?.profile_picture,
+      role: listing.users?.role || 'Member'
+    }
+  })) || []
+
   return {
-    ads: listings || [], // Keep the name 'ads' for now to avoid changing the component props
+    ads: transformedListings,
     totalPages
   }
 }
 
 async function getMainCategoriesWithListings() {
-  // Get main categories (those without parent_id)
-  const { data: mainCategories, error: categoryError } = await supabase
+  // Get main categories (those without parent_id), limited to 5
+  const { data: categories } = await supabase
     .from('categories')
-    .select('id, name, description')
+    .select('*')
     .is('parent_id', null)
-    .limit(5)
+    .order('name')  // Or any other ordering you prefer
+    .limit(5)  // Limit to 5 main categories
 
-  if (categoryError) {
-    console.error('Error fetching categories:', categoryError)
-    return []
-  }
-
-  // For each main category, get its listings
   const categoriesWithListings = await Promise.all(
-    mainCategories.map(async (category) => {
-      // First, get all subcategory IDs for this main category
+    categories?.map(async (category) => {
+      // First get all subcategories for this main category
       const { data: subcategories } = await supabase
         .from('categories')
         .select('id')
         .eq('parent_id', category.id)
 
-      // Create array of category IDs including main category and all its subcategories
-      const categoryIds = [category.id, ...(subcategories?.map(sub => sub.id) || [])]
+      // Create array of category IDs including main category and all subcategories
+      const categoryIds = [
+        category.id,
+        ...(subcategories?.map(sub => sub.id) || [])
+      ]
 
       // Get listings from main category and all its subcategories
       const { data: listings, error: listingsError } = await supabase
@@ -103,20 +104,16 @@ async function getMainCategoriesWithListings() {
           description,
           price,
           currency,
+          status,
           created_at,
-          categories (
-            name
-          ),
-          locations (
-            name
-          ),
-          listing_images (
-            image_url
-          ),
-          users (
+          categories (name),
+          locations (name),
+          listing_images (image_url),
+          users:user_id (
+            id,
             name,
-            role,
-            profile_picture
+            profile_picture,
+            role
           )
         `)
         .in('category_id', categoryIds)
@@ -128,23 +125,22 @@ async function getMainCategoriesWithListings() {
         return { ...category, listings: [] }
       }
 
-      // Transform the data to match our expected format
+      // Transform the listings data
       const transformedListings = listings?.map(listing => ({
         ...listing,
-        user: listing.users // Rename users to user
+        users: {
+          id: listing.users?.id,
+          name: listing.users?.name || 'Anonymous',
+          profile_picture: listing.users?.profile_picture,
+          role: listing.users?.role || 'Member'
+        }
       })) || []
-
-      // Log for debugging
-      console.log(`Category ${category.name}:`, {
-        categoryIds,
-        listingsCount: transformedListings?.length || 0
-      })
 
       return {
         ...category,
         listings: transformedListings
       }
-    })
+    }) || []
   )
 
   return categoriesWithListings
@@ -161,7 +157,12 @@ function mapListingData(data: any) {
     categories: data.categories,
     locations: data.locations,
     listing_images: data.listing_images,
-    user: data.users  // Map users to user
+    users: {
+      id: data.users?.id,
+      name: data.users?.name || 'Anonymous',
+      profile_picture: data.users?.profile_picture,
+      role: data.users?.role || 'Member'
+    }
   }
 }
 
@@ -178,10 +179,10 @@ export default async function Home() {
             category={category.name}
             description={category.description}
           >
-            {category.listings.slice(0, 10).map((listing) => (
+            {category.listings.map((listing) => (
               <ListingCard 
                 key={listing.id}
-                listing={mapListingData(listing)}
+                listing={listing}  // No need for mapListingData since data is already transformed
               />
             ))}
           </CategorySection>
