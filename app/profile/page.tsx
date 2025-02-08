@@ -37,11 +37,15 @@ interface UserListing {
   } | null
 }
 
+const ITEMS_PER_PAGE = 8
+
 export default function ProfilePage() {
   const { user } = useAuth()
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [listings, setListings] = useState<UserListing[]>([])
   const [loading, setLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalListings, setTotalListings] = useState(0)
 
   useEffect(() => {
     if (!user) return
@@ -102,6 +106,12 @@ export default function ProfilePage() {
     }
   }, [user])
 
+  useEffect(() => {
+    if (user) {
+      loadProfile()
+    }
+  }, [currentPage, user])
+
   async function loadProfile() {
     if (!user) return
 
@@ -115,7 +125,18 @@ export default function ProfilePage() {
 
       if (userError) throw userError
 
-      // Then get user's listings using the correct user_id
+      // Get total count of listings
+      const { count: totalCount } = await supabase
+        .from('listings')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userData.id)
+
+      setTotalListings(totalCount || 0)
+
+      // Then get user's listings using the correct user_id with pagination
+      const from = (currentPage - 1) * ITEMS_PER_PAGE
+      const to = from + ITEMS_PER_PAGE - 1
+
       const { data: listings, error: listingsError } = await supabase
         .from('listings')
         .select(`
@@ -137,6 +158,7 @@ export default function ProfilePage() {
         `)
         .eq('user_id', userData.id)
         .order('created_at', { ascending: false })
+        .range(from, to)
 
       if (listingsError) throw listingsError
 
@@ -163,9 +185,11 @@ export default function ProfilePage() {
     return <ProfileSkeleton />
   }
 
+  const totalPages = Math.ceil(totalListings / ITEMS_PER_PAGE)
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="max-w-5xl mx-auto">
+      <div className="mx-auto">
         {/* Profile Header */}
         <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-6 mb-8">
           <div className="flex items-start gap-6">
@@ -222,28 +246,53 @@ export default function ProfilePage() {
         {/* User's Listings */}
         <div>
           <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
-            My Listings ({listings.length})
+            My Listings ({totalListings})
           </h2>
           {listings.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {listings.map((listing) => (
-                <ListingCard
-                  key={listing.id}
-                  listing={{
-                    ...listing,
-                    user: {
-                      name: user.email || '',
-                      role: 'user',
-                      profile_picture: profile?.profile_picture || undefined
-                    }
-                  }}
-                />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-6">
+                {listings.map((listing) => (
+                  <ListingCard
+                    key={listing.id}
+                    listing={{
+                      ...listing,
+                      user: {
+                        name: user.email || '',
+                        role: 'user',
+                        profile_picture: profile?.profile_picture || undefined
+                      }
+                    }}
+                  />
+                ))}
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex justify-center items-center mt-8 gap-2">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 disabled:opacity-50"
+                  >
+                    Previous
+                  </button>
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             <div className="text-center py-12 bg-white dark:bg-gray-900 rounded-lg">
               <p className="text-gray-600 dark:text-gray-400">
-                You haven't posted any listings yet.
+                You haven&apos;t posted any listings yet.
               </p>
               <Link
                 href="/post-ad"

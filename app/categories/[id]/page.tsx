@@ -105,7 +105,9 @@ async function getCategoryWithListings(categoryId: string, options: {
     case 'price_high': {
       // Get total count first
       const { count: totalCount } = await query
-        .select('id', { count: 'exact', head: true })
+        .select('id', { count: 'exact' })
+        .limit(1)
+        .single()
 
       // First get listings with prices
       const { data: pricedListings = [] } = await query
@@ -150,7 +152,7 @@ async function getCategoryWithListings(categoryId: string, options: {
       return {
         category,
         listings: [...pricedListings, ...unpricedListings],
-        totalCount: totalCount || 0
+        totalCount: totalCount?.count || 0
       }
     }
     case 'oldest':

@@ -705,7 +705,7 @@ const ListingDetailsForm = ({
                 errors.price && "border-red-500"
               )}
               placeholder="Enter price"
-              required
+            required
             />
             {errors.price && (
               <p className="mt-1 text-sm text-red-500">{errors.price}</p>
@@ -1288,8 +1288,8 @@ export default function PostAdPage() {
                       Back
                     </button>
 
-                    <button
-                      type="submit"
+          <button
+            type="submit"
                       disabled={loading}
                       className={clsx(
                         "flex items-center px-8 py-3 text-lg font-medium",
@@ -1308,9 +1308,9 @@ export default function PostAdPage() {
                       ) : (
                         "Publish Listing"
                       )}
-                    </button>
-                  </div>
-                </form>
+          </button>
+        </div>
+      </form>
               </div>
             </div>
           </div>
@@ -1438,8 +1438,8 @@ export default function PostAdPage() {
             </div>
           </div>
         )}
-      </div>
-    );
+    </div>
+  );
   }
 
   if (!user) {
