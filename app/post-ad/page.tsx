@@ -15,11 +15,17 @@ import {
   MapPinIcon,
   CurrencyDollarIcon,
   PhotoIcon,
-  EyeIcon
+  EyeIcon,
+  PhoneIcon
 } from '@heroicons/react/24/solid'
 import { Category, Location } from '@/types'
 import Image from 'next/image'
 import { processImage } from '@/lib/image-helpers'
+import { BsWhatsapp } from 'react-icons/bs'
+import { motion } from 'framer-motion'
+import clsx from 'clsx'
+import Link from 'next/link'
+import { XMarkIcon } from '@heroicons/react/24/outline'
 
 interface CategoryWithChildren extends Category {
   children?: CategoryWithChildren[]
@@ -39,37 +45,47 @@ interface FormState {
   location_id: string
   selectedCategory: CategoryWithChildren | null
   selectedLocation: LocationWithChildren | null
+  use_profile_number: boolean
+  contact_number: string
+  contact_whatsapp: boolean
+  contact_call: boolean
+}
+
+interface ContactOptionsSectionProps {
+  formState: FormState
+  setFormState: (state: FormState | ((prev: FormState) => FormState)) => void
+  user: any
 }
 
 const STEPS = [
   {
     id: 1,
-    title: 'Basic Info',
-    description: 'Start with the essentials',
+    title: 'Listing Details',
+    description: 'Add basic information',
     icon: PencilSquareIcon
   },
   {
     id: 2,
-    title: 'Category & Location',
-    description: 'Tell us where to find it',
-    icon: MapPinIcon
+    title: 'Category',
+    description: 'Choose category',
+    icon: TagIcon
   },
   {
     id: 3,
-    title: 'Price',
-    description: 'Set your price',
-    icon: CurrencyDollarIcon
+    title: 'Location & Contact',
+    description: 'Add contact details',
+    icon: MapPinIcon
   },
   {
     id: 4,
     title: 'Photos',
-    description: 'Show it off',
+    description: 'Upload images',
     icon: PhotoIcon
   },
   {
     id: 5,
-    title: 'Preview',
-    description: 'Review your listing',
+    title: 'Review & Publish',
+    description: 'Preview and submit',
     icon: EyeIcon
   }
 ]
@@ -221,6 +237,424 @@ const ListingPreview = ({ formData, images }) => {
   )
 }
 
+const CategorySelector = ({ 
+  categories, 
+  formState, 
+  setFormState, 
+  selectedSubcategory, 
+  setSelectedSubcategory 
+}) => (
+  <motion.div 
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    className="space-y-6"
+  >
+    <h3 className="text-xl font-semibold flex items-center gap-2 text-gray-800">
+      <TagIcon className="w-6 h-6 text-brand-600" />
+      Choose Category
+    </h3>
+
+    <div className="grid md:grid-cols-2 gap-6">
+      {/* Main Categories */}
+      <div className="space-y-3">
+        <label className="block text-sm font-medium text-gray-700">
+          Main Category
+          </label>
+        <div className="bg-gray-50 rounded-xl p-3 h-[320px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400">
+          {categories.map(category => (
+            <motion.button
+              key={category.id}
+              onClick={() => {
+                setFormState(prev => ({
+                  ...prev,
+                  selectedCategory: category,
+                  category_id: category.children?.length ? '' : String(category.id)
+                }))
+                setSelectedSubcategory(null)
+              }}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+              className={clsx(
+                "w-full text-left p-3 rounded-lg transition-all",
+                "flex items-center justify-between",
+                formState.selectedCategory?.id === category.id
+                  ? "bg-brand-50 text-brand-600 border-brand-200"
+                  : "hover:bg-white hover:shadow-sm"
+              )}
+            >
+              <span>{category.name}</span>
+              {category.children?.length > 0 && (
+                <ArrowRightIcon className="w-4 h-4" />
+              )}
+            </motion.button>
+          ))}
+        </div>
+        </div>
+
+      {/* Subcategories */}
+      {formState.selectedCategory?.children?.length > 0 && (
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="space-y-3"
+        >
+          <label className="block text-sm font-medium text-gray-700">
+            Subcategory
+          </label>
+          <div className="bg-gray-50 rounded-xl p-3 h-[320px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400">
+            {formState.selectedCategory.children.map(subcategory => (
+              <motion.button
+                key={subcategory.id}
+                onClick={() => {
+                  setSelectedSubcategory(subcategory)
+                  setFormState(prev => ({
+                    ...prev,
+                    category_id: String(subcategory.id)
+                  }))
+                }}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                className={clsx(
+                  "w-full text-left p-3 rounded-lg transition-all",
+                  selectedSubcategory?.id === subcategory.id
+                    ? "bg-brand-50 text-brand-600 border-brand-200"
+                    : "hover:bg-white hover:shadow-sm"
+                )}
+              >
+                {subcategory.name}
+              </motion.button>
+            ))}
+          </div>
+        </motion.div>
+      )}
+    </div>
+  </motion.div>
+)
+
+const LocationSelector = ({ 
+  locations, 
+  formState, 
+  setFormState, 
+  selectedSubLocation, 
+  setSelectedSubLocation 
+}) => (
+  <motion.div 
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    className="space-y-6 mt-12"
+  >
+    <h3 className="text-xl font-semibold flex items-center gap-2 text-gray-800">
+      <MapPinIcon className="w-6 h-6 text-brand-600" />
+      Select Location
+    </h3>
+
+    <div className="grid md:grid-cols-2 gap-6">
+      {/* Main Locations */}
+      <div className="space-y-3">
+        <label className="block text-sm font-medium text-gray-700">
+          Region
+        </label>
+        <div className="bg-gray-50 rounded-xl p-3 h-[320px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400">
+          {locations.map(location => (
+            <motion.button
+              key={location.id}
+              onClick={() => {
+                setFormState(prev => ({
+                  ...prev,
+                  selectedLocation: location,
+                  location_id: location.children?.length ? '' : String(location.id)
+                }))
+                setSelectedSubLocation(null)
+              }}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+              className={clsx(
+                "w-full text-left p-3 rounded-lg transition-all",
+                "flex items-center justify-between",
+                formState.selectedLocation?.id === location.id
+                  ? "bg-brand-50 text-brand-600 border-brand-200"
+                  : "hover:bg-white hover:shadow-sm"
+              )}
+            >
+              <span>{location.name}</span>
+              {location.children?.length > 0 && (
+                <ArrowRightIcon className="w-4 h-4" />
+              )}
+            </motion.button>
+          ))}
+        </div>
+        </div>
+
+      {/* Sub-locations */}
+      {formState.selectedLocation?.children?.length > 0 && (
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="space-y-3"
+        >
+          <label className="block text-sm font-medium text-gray-700">
+            City
+          </label>
+          <div className="bg-gray-50 rounded-xl p-3 h-[320px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400">
+            {formState.selectedLocation.children.map(sublocation => (
+              <motion.button
+                key={sublocation.id}
+                onClick={() => {
+                  setSelectedSubLocation(sublocation)
+                  setFormState(prev => ({
+                    ...prev,
+                    location_id: String(sublocation.id)
+                  }))
+                }}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                className={clsx(
+                  "w-full text-left p-3 rounded-lg transition-all",
+                  selectedSubLocation?.id === sublocation.id
+                    ? "bg-brand-50 text-brand-600 border-brand-200"
+                    : "hover:bg-white hover:shadow-sm"
+                )}
+              >
+                {sublocation.name}
+              </motion.button>
+            ))}
+          </div>
+        </motion.div>
+      )}
+    </div>
+  </motion.div>
+)
+
+const ContactOptionsSection = ({ formState, setFormState, user }: ContactOptionsSectionProps) => (
+  <motion.div 
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    className="space-y-6"
+  >
+    <h3 className="text-xl font-semibold flex items-center gap-2 text-gray-800">
+      <PhoneIcon className="w-6 h-6 text-brand-600" />
+      Contact Options
+    </h3>
+
+    <div className="space-y-8">
+      {/* Phone Number Selection */}
+      <div className="space-y-4">
+        <label className="block text-sm font-medium text-gray-700">
+          Contact Phone Number
+        </label>
+        <div className="space-y-4">
+          <motion.label 
+            whileHover={{ scale: 1.01 }}
+            className="flex items-center p-4 rounded-xl bg-gray-50 cursor-pointer"
+          >
+            <input
+              type="radio"
+              checked={formState.use_profile_number}
+              onChange={() => setFormState(prev => ({
+                ...prev,
+                use_profile_number: true,
+                contact_number: user?.user_metadata.phone || ''
+              }))}
+              className="text-brand-600 focus:ring-brand-500"
+            />
+            <span className="ml-3">Use my profile number ({user?.user_metadata.phone || 'Not set'})</span>
+          </motion.label>
+          
+          <motion.label 
+            whileHover={{ scale: 1.01 }}
+            className="flex items-center p-4 rounded-xl bg-gray-50 cursor-pointer"
+          >
+            <input
+              type="radio"
+              checked={!formState.use_profile_number}
+              onChange={() => setFormState(prev => ({
+                ...prev,
+                use_profile_number: false
+              }))}
+              className="text-brand-600 focus:ring-brand-500"
+            />
+            <span className="ml-3">Use a different number</span>
+          </motion.label>
+
+          {!formState.use_profile_number && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <input
+                type="tel"
+                value={formState.contact_number}
+                onChange={(e) => setFormState(prev => ({
+                  ...prev,
+                  contact_number: e.target.value
+                }))}
+                placeholder="Enter phone number"
+                className="w-full px-4 py-3 rounded-xl border-gray-200 focus:ring-2 focus:ring-brand-500"
+              />
+            </motion.div>
+          )}
+        </div>
+      </div>
+
+      {/* Contact Methods */}
+      <div className="space-y-4">
+        <label className="block text-sm font-medium text-gray-700">
+          How would you like to be contacted?
+        </label>
+        <div className="grid grid-cols-2 gap-4">
+          <motion.label 
+            whileHover={{ scale: 1.01 }}
+            className={clsx(
+              "flex items-center p-4 rounded-xl cursor-pointer transition-colors",
+              formState.contact_whatsapp ? "bg-green-50" : "bg-gray-50"
+            )}
+          >
+            <input
+              type="checkbox"
+              checked={formState.contact_whatsapp}
+              onChange={(e) => setFormState(prev => ({
+                ...prev,
+                contact_whatsapp: e.target.checked
+              }))}
+              className="text-green-500 focus:ring-green-400 rounded"
+            />
+            <span className="ml-3 flex items-center gap-2">
+              <BsWhatsapp className="w-5 h-5 text-green-500" />
+              WhatsApp
+            </span>
+          </motion.label>
+          
+          <motion.label 
+            whileHover={{ scale: 1.01 }}
+            className={clsx(
+              "flex items-center p-4 rounded-xl cursor-pointer transition-colors",
+              formState.contact_call ? "bg-brand-50" : "bg-gray-50"
+            )}
+          >
+            <input
+              type="checkbox"
+              checked={formState.contact_call}
+              onChange={(e) => setFormState(prev => ({
+                ...prev,
+                contact_call: e.target.checked
+              }))}
+              className="text-brand-600 focus:ring-brand-500 rounded"
+            />
+            <span className="ml-3 flex items-center gap-2">
+              <PhoneIcon className="w-5 h-5" />
+              Phone Call
+            </span>
+          </motion.label>
+        </div>
+      </div>
+
+      {!formState.contact_whatsapp && !formState.contact_call && (
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-red-500 text-sm"
+        >
+          Please select at least one contact method
+        </motion.p>
+      )}
+    </div>
+  </motion.div>
+)
+
+const validateContactOptions = (formState) => {
+  if (!formState.contact_whatsapp && !formState.contact_call) {
+    toast.error('Please select at least one contact method')
+    return false
+  }
+
+  if (!formState.use_profile_number && !formState.contact_number) {
+    toast.error('Please enter a contact number')
+    return false
+  }
+
+  return true
+}
+
+// Update the Logo component
+const Logo = () => (
+  <span className="text-4xl font-extrabold text-brand-600">
+    Obilli
+  </span>
+)
+
+// Add this new component for the listing details form
+const ListingDetailsForm = ({ formState, setFormState }) => {
+  // Local state for input values
+  const [title, setTitle] = useState(formState.title)
+  const [description, setDescription] = useState(formState.description)
+  const [price, setPrice] = useState(formState.displayPrice)
+
+  // Update parent state on blur
+  const handleBlur = () => {
+    setFormState(prev => ({
+      ...prev,
+      title,
+      description,
+      price: price.replace(/[^\d]/g, ''),
+      displayPrice: price
+    }))
+  }
+
+  // Format price as user types
+  const handlePriceChange = (value: string) => {
+    const numericValue = value.replace(/[^\d]/g, '')
+    const displayValue = numericValue ? parseInt(numericValue).toLocaleString('fr-FR') : ''
+    setPrice(displayValue)
+  }
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-2xl font-semibold mb-6">Add Listing Details</h2>
+        <div className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium mb-2">Title</label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onBlur={handleBlur}
+              className="w-full px-4 py-3 text-lg border rounded-xl focus:ring-2 focus:ring-brand-500"
+              placeholder="Short and descriptive title"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Description</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              onBlur={handleBlur}
+              rows={6}
+              className="w-full px-4 py-3 text-lg border rounded-xl focus:ring-2 focus:ring-brand-500"
+              placeholder="Include detailed features, specifications, condition, and any additional information"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Price (FCFA)</label>
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={price}
+              onChange={(e) => handlePriceChange(e.target.value)}
+              onBlur={handleBlur}
+              className="w-full px-4 py-3 text-lg border rounded-xl focus:ring-2 focus:ring-brand-500"
+              placeholder="Enter price"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function PostAdPage() {
   const router = useRouter()
   const { user } = useAuth()
@@ -241,6 +675,10 @@ export default function PostAdPage() {
     location_id: '',
     selectedCategory: null,
     selectedLocation: null,
+    use_profile_number: true,
+    contact_number: '',
+    contact_whatsapp: true,
+    contact_call: true
   })
   const [uploadProgress, setUploadProgress] = useState(0)
 
@@ -284,7 +722,7 @@ export default function PostAdPage() {
     items.forEach(item => {
       if (item.parent_id && itemMap[item.parent_id]) {
         itemMap[item.parent_id].children.push(itemMap[item.id])
-      } else {
+      } else if (!item.parent_id) { // Only add to roots if no parent_id
         roots.push(itemMap[item.id])
       }
     })
@@ -367,19 +805,29 @@ export default function PostAdPage() {
         return
       }
 
+      if (!validateContactOptions(formState)) return
+
       // Create the listing with the user's ID from users table
+      const listingData = {
+        user_id: userData.id,
+        title: formState.title,
+        description: formState.description,
+        price: parseInt(formState.price),
+        currency: formState.currency,
+        category_id: parseInt(formState.category_id),
+        location_id: parseInt(formState.location_id),
+        status: 'pending',
+        contact_number: formState.use_profile_number ? 
+          user?.user_metadata.phone : 
+          formState.contact_number,
+        contact_whatsapp: formState.contact_whatsapp,
+        contact_call: formState.contact_call,
+        use_profile_number: formState.use_profile_number
+      }
+
       const { data: listing, error: listingError } = await supabase
         .from('listings')
-        .insert({
-          user_id: userData.id,
-          title: formState.title,
-          description: formState.description,
-          price: parseInt(formState.price),
-          currency: formState.currency,
-          category_id: parseInt(formState.category_id),
-          location_id: parseInt(formState.location_id),
-          status: 'pending',
-        })
+        .insert(listingData)
         .select(`
           *,
           categories (
@@ -470,184 +918,297 @@ export default function PostAdPage() {
     }
   }
 
-  const renderCategoryLocationSection = () => (
-    <div className="space-y-8">
-      {/* Categories */}
-        <div>
-        <label className="block text-lg font-medium mb-4 text-gray-700 dark:text-gray-200">
-            Category
-          </label>
-        <div className="space-y-4">
-          {/* Main categories */}
-          <div className="flex flex-wrap gap-2">
-            {categoriesTree.map(category => (
-              <button
-                key={category.id}
-                onClick={() => handleCategorySelect(category)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors
-                  ${formState.selectedCategory?.id === category.id
-                    ? 'bg-brand-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200'
-                  }`}
-                type="button"
-              >
-                {category.name}
-                {category.children?.length > 0 && ' ›'}
-              </button>
-            ))}
-          </div>
+  const validateStep = (currentStep: number) => {
+    switch (currentStep) {
+      case 1:
+        if (!formState.title.trim()) {
+          toast.error('Please enter a title')
+          return false
+        }
+        if (!formState.description.trim()) {
+          toast.error('Please enter a description')
+          return false
+        }
+        if (!validateContactOptions(formState)) {
+          return false
+        }
+        return true
 
-          {/* Subcategories */}
-          {formState.selectedCategory?.children?.length > 0 && (
-            <div className="ml-4 flex flex-wrap gap-2">
-              {formState.selectedCategory.children.map(subcategory => (
-                <button
-                  key={subcategory.id}
-                  onClick={() => handleSubcategorySelect(subcategory)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors
-                    ${selectedSubcategory?.id === subcategory.id
-                      ? 'bg-brand-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200'
-                    }`}
-                  type="button"
-                >
-                  {subcategory.name}
-                  {selectedSubcategory?.id === subcategory.id && (
-                    <CheckCircleIcon className="w-4 h-4 ml-1 inline-block" />
-                  )}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-        </div>
+      case 2:
+        if (!formState.category_id) {
+          toast.error('Please select a category')
+          return false
+        }
+        if (!formState.location_id) {
+          toast.error('Please select a location')
+          return false
+        }
+        return true
 
-      {/* Locations */}
-        <div>
-        <label className="block text-lg font-medium mb-4 text-gray-700 dark:text-gray-200">
-            Location
-          </label>
-        <div className="space-y-4">
-          {/* Main locations */}
-          <div className="flex flex-wrap gap-2">
-            {locationsTree.map(location => (
-              <button
-                key={location.id}
-                onClick={() => handleLocationSelect(location)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors
-                  ${formState.selectedLocation?.id === location.id
-                    ? 'bg-brand-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200'
-                  }`}
-                type="button"
-              >
-                {location.name}
-                {location.children?.length > 0 && ' ›'}
-              </button>
-            ))}
-          </div>
+      case 3:
+        if (!formState.use_profile_number && !formState.contact_number) {
+          toast.error('Please enter a contact number')
+          return false
+        }
+        return true
 
-          {/* Sublocations */}
-          {formState.selectedLocation?.children?.length > 0 && (
-            <div className="ml-4 flex flex-wrap gap-2">
-              {formState.selectedLocation.children.map(sublocation => (
-                <button
-                  key={sublocation.id}
-                  onClick={() => handleSubLocationSelect(sublocation)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors
-                    ${selectedSubLocation?.id === sublocation.id
-                      ? 'bg-brand-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200'
-                    }`}
-                  type="button"
-                >
-                  {sublocation.name}
-                  {selectedSubLocation?.id === sublocation.id && (
-                    <CheckCircleIcon className="w-4 h-4 ml-1 inline-block" />
-                  )}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  )
+      case 4:
+        if (images.length === 0) {
+          toast.error('Please upload at least one photo')
+          return false
+        }
+        return true
 
-  const renderStep = () => {
+      case 5:
+        return true
+
+      default:
+        return false
+    }
+  }
+
+  const renderStepContent = () => {
     switch (step) {
       case 1:
+        return <ListingDetailsForm formState={formState} setFormState={setFormState} />
+
+      case 2:
         return (
           <div className="space-y-8">
-            <div>
-              <label htmlFor="title" className="block text-lg font-medium mb-2 text-gray-700 dark:text-gray-200">
-                Title
-              </label>
-              <input
-                id="title"
-                defaultValue={formState.title}
-                onBlur={(e) => updateFormState('title', e.target.value)}
-                className="w-full px-4 py-3 text-lg border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-brand-500 dark:bg-gray-800"
-                placeholder="What are you selling?"
-                required
-              />
-        </div>
+            <h2 className="text-2xl font-semibold mb-6">Select Category</h2>
+            <div className="space-y-8">
+              {/* Main Categories */}
+              <div>
+                <label className="block text-sm font-medium mb-4">Main Category</label>
+                <div className="flex flex-wrap gap-3">
+                  {categoriesTree.map(category => (
+                    <button
+                      key={category.id}
+                      onClick={() => {
+                        setFormState(prev => ({
+                          ...prev,
+                          selectedCategory: category,
+                          category_id: category.children?.length ? '' : String(category.id)
+                        }))
+                        setSelectedSubcategory(null)
+                      }}
+                      className={clsx(
+                        "px-6 py-3 rounded-full text-sm font-medium transition-all",
+                        formState.selectedCategory?.id === category.id
+                          ? "bg-brand-600 text-white"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      )}
+                    >
+                      {category.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-        <div>
-              <label htmlFor="description" className="block text-lg font-medium mb-2 text-gray-700 dark:text-gray-200">
-                Description
-              </label>
-              <textarea
-                id="description"
-                defaultValue={formState.description}
-                onBlur={(e) => updateFormState('description', e.target.value)}
-                rows={4}
-                className="w-full px-4 py-3 text-lg border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-brand-500 dark:bg-gray-800"
-                placeholder="Describe your item in detail"
-                required
-              />
+              {/* Subcategories */}
+              {formState.selectedCategory?.children?.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-4"
+                >
+                  <label className="block text-sm font-medium mb-4">Subcategory</label>
+                  <div className="flex flex-wrap gap-3">
+                    {formState.selectedCategory.children.map(subcategory => (
+                      <button
+                        key={subcategory.id}
+                        onClick={() => {
+                          setSelectedSubcategory(subcategory)
+                          setFormState(prev => ({
+                            ...prev,
+                            category_id: String(subcategory.id)
+                          }))
+                        }}
+                        className={clsx(
+                          "px-6 py-3 rounded-full text-sm font-medium transition-all border-2",
+                          selectedSubcategory?.id === subcategory.id
+                            ? "border-brand-600 bg-brand-50 text-brand-600"
+                            : "border-transparent bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        )}
+                      >
+                        {subcategory.name}
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
             </div>
           </div>
         )
 
-      case 2:
-        return renderCategoryLocationSection()
-
       case 3:
         return (
-          <div className="space-y-6">
-            <div>
-              <label htmlFor="price" className="block text-lg font-medium mb-2 text-gray-700 dark:text-gray-200">
-                Price (FCFA)
-              </label>
-              <input
-                id="price"
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                defaultValue={formState.displayPrice}
-                onBlur={(e) => {
-                  const value = e.target.value.replace(/[^\d]/g, '')
-                  const numericValue = value === '' ? '' : value
-                  const displayValue = numericValue ? parseInt(numericValue).toLocaleString('fr-FR') : ''
-                  
-                  setFormState(prev => ({
-                    ...prev,
-                    price: numericValue,
-                    displayPrice: displayValue
-                  }))
-                }}
-                className="w-full px-4 py-3 text-lg border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-brand-500 dark:bg-gray-800"
-                placeholder="0"
-                required
-              />
+          <div className="space-y-8">
+            <h2 className="text-2xl font-semibold mb-6">Location & Contact Details</h2>
+            
+            {/* Location Selection */}
+            <div className="space-y-8">
+        <div>
+                <label className="block text-sm font-medium mb-4">Select Location</label>
+                <div className="flex flex-wrap gap-3">
+                  {locationsTree.map(location => (
+                    <button
+                      key={location.id}
+                      onClick={() => {
+                        setFormState(prev => ({
+                          ...prev,
+                          selectedLocation: location,
+                          location_id: location.children?.length ? '' : String(location.id)
+                        }))
+                        setSelectedSubLocation(null)
+                      }}
+                      className={clsx(
+                        "px-6 py-3 rounded-full text-sm font-medium transition-all",
+                        formState.selectedLocation?.id === location.id
+                          ? "bg-brand-600 text-white"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      )}
+                    >
+                      {location.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {formState.selectedLocation?.children?.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-4"
+                >
+                  <label className="block text-sm font-medium mb-4">Select City</label>
+                  <div className="flex flex-wrap gap-3">
+                    {formState.selectedLocation.children.map(city => (
+                      <button
+                        key={city.id}
+                        onClick={() => {
+                          setSelectedSubLocation(city)
+                          setFormState(prev => ({
+                            ...prev,
+                            location_id: String(city.id)
+                          }))
+                        }}
+                        className={clsx(
+                          "px-6 py-3 rounded-full text-sm font-medium transition-all border-2",
+                          selectedSubLocation?.id === city.id
+                            ? "border-brand-600 bg-brand-50 text-brand-600"
+                            : "border-transparent bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        )}
+                      >
+                        {city.name}
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </div>
+
+            {/* Contact Options */}
+            <div className="space-y-6">
+              <h3 className="text-lg font-medium">Contact Methods</h3>
+              
+              {/* Phone Number */}
+              <div className="space-y-4">
+                <label className="block text-sm font-medium">Phone Number</label>
+                <div className="space-y-3">
+                  <label className="flex items-center p-4 bg-gray-50 rounded-xl">
+                    <input
+                      type="radio"
+                      checked={formState.use_profile_number}
+                      onChange={() => setFormState(prev => ({
+                        ...prev,
+                        use_profile_number: true,
+                        contact_number: user?.user_metadata.phone || ''
+                      }))}
+                      className="text-brand-600"
+                    />
+                    <span className="ml-3">Use my profile number ({user?.user_metadata.phone || 'Not set'})</span>
+                  </label>
+
+                  <label className="flex items-center p-4 bg-gray-50 rounded-xl">
+                    <input
+                      type="radio"
+                      checked={!formState.use_profile_number}
+                      onChange={() => setFormState(prev => ({
+                        ...prev,
+                        use_profile_number: false
+                      }))}
+                      className="text-brand-600"
+                    />
+                    <span className="ml-3">Use a different number</span>
+                  </label>
+
+                  {!formState.use_profile_number && (
+                    <input
+                      type="tel"
+                      value={formState.contact_number}
+                      onChange={(e) => setFormState(prev => ({
+                        ...prev,
+                        contact_number: e.target.value
+                      }))}
+                      placeholder="Enter phone number"
+                      className="w-full px-4 py-3 border rounded-xl"
+                    />
+                  )}
+                </div>
+              </div>
+
+              {/* Contact Methods */}
+              <div className="space-y-4">
+                <label className="block text-sm font-medium">Preferred Contact Methods</label>
+                <div className="grid grid-cols-2 gap-4">
+                  <label className={clsx(
+                    "flex items-center p-4 rounded-xl cursor-pointer transition-colors",
+                    formState.contact_whatsapp ? "bg-green-50" : "bg-gray-50"
+                  )}>
+                    <input
+                      type="checkbox"
+                      checked={formState.contact_whatsapp}
+                      onChange={(e) => setFormState(prev => ({
+                        ...prev,
+                        contact_whatsapp: e.target.checked
+                      }))}
+                      className="text-green-500"
+                    />
+                    <span className="ml-3 flex items-center gap-2">
+                      <BsWhatsapp className="w-5 h-5 text-green-500" />
+                      WhatsApp
+                    </span>
+                  </label>
+
+                  <label className={clsx(
+                    "flex items-center p-4 rounded-xl cursor-pointer transition-colors",
+                    formState.contact_call ? "bg-brand-50" : "bg-gray-50"
+                  )}>
+                    <input
+                      type="checkbox"
+                      checked={formState.contact_call}
+                      onChange={(e) => setFormState(prev => ({
+                        ...prev,
+                        contact_call: e.target.checked
+                      }))}
+                      className="text-brand-600"
+                    />
+                    <span className="ml-3 flex items-center gap-2">
+                      <PhoneIcon className="w-5 h-5" />
+                      Phone Call
+                    </span>
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
         )
 
       case 4:
         return (
-          <div className="space-y-6">
+          <div className="space-y-8">
+            <h2 className="text-2xl font-semibold mb-6">Upload Photos</h2>
             <ImageUpload
               images={images}
               setImages={setImages}
@@ -658,7 +1219,23 @@ export default function PostAdPage() {
 
       case 5:
         return (
-          <ListingPreview formData={formState} images={images} />
+          <div className="space-y-8">
+            <h2 className="text-2xl font-semibold mb-6">Review & Publish</h2>
+            <ListingPreview formData={formState} images={images} />
+            <div className="flex justify-end">
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                className={clsx(
+                  "px-8 py-3 bg-brand-600 text-white rounded-xl font-medium",
+                  "hover:bg-brand-700 transition-colors",
+                  loading && "opacity-50 cursor-not-allowed"
+                )}
+              >
+                {loading ? 'Publishing...' : 'Publish Listing'}
+              </button>
+            </div>
+          </div>
         )
 
       default:
@@ -668,9 +1245,29 @@ export default function PostAdPage() {
 
   const MainContent = () => {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <StepIndicator currentStep={step} steps={STEPS} />
-        
+      <div className="min-h-screen bg-gray-50">
+        <div className="sticky top-0 z-10 bg-white">
+          <div className="container mx-auto px-4 flex items-center space-x-12">
+            {/* Logo */}
+            <Link href="/" className="flex-shrink-0">
+              <Logo />
+            </Link>
+
+            {/* Steps - using flex-grow to take remaining space */}
+            <div className="flex-grow">
+              <StepIndicator currentStep={step} steps={STEPS} />
+            </div>
+
+            {/* Close button */}
+            <Link 
+              href="/"
+              className="flex-shrink-0 p-2.5 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <XMarkIcon className="w-7 h-7 text-gray-600" />
+            </Link>
+          </div>
+        </div>
+
         <div className="flex">
           <LeftPanel currentStep={step} steps={STEPS} />
 
@@ -679,7 +1276,7 @@ export default function PostAdPage() {
               <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-8">
                 <form onSubmit={(e) => e.preventDefault()} className="min-h-[400px] flex flex-col">
                   <div className="flex-1">
-                    {renderStep()}
+                    {renderStepContent()}
                   </div>
 
                   {/* Fixed position navigation buttons */}

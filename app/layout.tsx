@@ -5,6 +5,8 @@ import './globals.css'
 import { supabase } from '@/lib/supabase'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { headers } from 'next/headers'
+import PageWrapper from '@/components/layouts/PageWrapper'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -27,25 +29,19 @@ async function getCategories() {
   return categories
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const categories = await getCategories()
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-all duration-300`}>
         <AuthProvider>
           <ThemeProvider>
-            <div className="min-h-screen flex flex-col">
-              <Navigation categories={categories} />
-              <main className="container mx-auto px-4 py-8 flex-grow text-lg">
-                {children}
-              </main>
-              <Footer categories={categories} />
-            </div>
+            <PageWrapper>
+              {children}
+            </PageWrapper>
           </ThemeProvider>
         </AuthProvider>
       </body>
