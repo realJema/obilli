@@ -26,6 +26,7 @@ import { motion } from 'framer-motion'
 import clsx from 'clsx'
 import Link from 'next/link'
 import { XMarkIcon } from '@heroicons/react/24/outline'
+import { useData } from '@/contexts/DataContext'
 
 interface CategoryWithChildren extends Category {
   children?: CategoryWithChildren[]
@@ -49,6 +50,7 @@ interface FormState {
   contact_number: string
   contact_whatsapp: boolean
   contact_call: boolean
+  validationAttempted?: boolean
 }
 
 interface ContactOptionsSectionProps {
@@ -159,7 +161,7 @@ const LeftPanel = ({ currentStep, steps }) => {
     <div className="w-1/3 p-12 flex flex-col min-h-[calc(100vh-73px)]">
       <div className="flex-1">
         <div className="mb-12">
-          <h1 className="text-5xl font-bold text-brand-600 mb-4">
+          <h1 className="text-3xl font-bold text-brand-600 mb-4">
             {step.title}
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-400">
@@ -436,45 +438,43 @@ const ContactOptionsSection = ({ formState, setFormState, user }: ContactOptions
       Contact Options
     </h3>
 
-    <div className="space-y-8">
-      {/* Phone Number Selection */}
-      <div className="space-y-4">
-        <label className="block text-sm font-medium text-gray-700">
-          Contact Phone Number
-        </label>
-        <div className="space-y-4">
-          <motion.label 
-            whileHover={{ scale: 1.01 }}
-            className="flex items-center p-4 rounded-xl bg-gray-50 cursor-pointer"
-          >
-            <input
-              type="radio"
-              checked={formState.use_profile_number}
-              onChange={() => setFormState(prev => ({
-                ...prev,
-                use_profile_number: true,
-                contact_number: user?.user_metadata.phone || ''
-              }))}
-              className="text-brand-600 focus:ring-brand-500"
-            />
-            <span className="ml-3">Use my profile number ({user?.user_metadata.phone || 'Not set'})</span>
-          </motion.label>
-          
-          <motion.label 
-            whileHover={{ scale: 1.01 }}
-            className="flex items-center p-4 rounded-xl bg-gray-50 cursor-pointer"
-          >
-            <input
-              type="radio"
-              checked={!formState.use_profile_number}
-              onChange={() => setFormState(prev => ({
-                ...prev,
-                use_profile_number: false
-              }))}
-              className="text-brand-600 focus:ring-brand-500"
-            />
-            <span className="ml-3">Use a different number</span>
-          </motion.label>
+    <div className="space-y-6">
+      <h3 className="text-lg font-medium">Contact Methods</h3>
+      
+      <div className="bg-gray-50 rounded-xl ">
+        {/* Phone Number Selection - More Compact */}
+        <div className="space-y-3">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Phone Number
+          </label>
+          <div className="flex gap-4">
+            <label className="flex-1 flex items-center p-3 bg-white rounded-lg border hover:border-brand-500 cursor-pointer transition-colors">
+              <input
+                type="radio"
+                checked={formState.use_profile_number}
+                onChange={() => setFormState(prev => ({
+                  ...prev,
+                  use_profile_number: true,
+                  contact_number: user?.user_metadata.phone || ''
+                }))}
+                className="text-brand-600 focus:ring-brand-500"
+              />
+              <span className="ml-2 text-sm">Profile: {user?.user_metadata.phone || 'Not set'}</span>
+            </label>
+
+            <label className="flex-1 flex items-center p-3 bg-white rounded-lg border hover:border-brand-500 cursor-pointer transition-colors">
+              <input
+                type="radio"
+                checked={!formState.use_profile_number}
+                onChange={() => setFormState(prev => ({
+                  ...prev,
+                  use_profile_number: false
+                }))}
+                className="text-brand-600 focus:ring-brand-500"
+              />
+              <span className="ml-2 text-sm">Different number</span>
+            </label>
+          </div>
 
           {!formState.use_profile_number && (
             <motion.div
@@ -489,62 +489,60 @@ const ContactOptionsSection = ({ formState, setFormState, user }: ContactOptions
                   contact_number: e.target.value
                 }))}
                 placeholder="Enter phone number"
-                className="w-full px-4 py-3 rounded-xl border-gray-200 focus:ring-2 focus:ring-brand-500"
+                className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-brand-500"
               />
             </motion.div>
           )}
         </div>
-      </div>
 
-      {/* Contact Methods */}
-      <div className="space-y-4">
-        <label className="block text-sm font-medium text-gray-700">
-          How would you like to be contacted?
-        </label>
-        <div className="grid grid-cols-2 gap-4">
-          <motion.label 
-            whileHover={{ scale: 1.01 }}
-            className={clsx(
-              "flex items-center p-4 rounded-xl cursor-pointer transition-colors",
-              formState.contact_whatsapp ? "bg-green-50" : "bg-gray-50"
-            )}
-          >
-            <input
-              type="checkbox"
-              checked={formState.contact_whatsapp}
-              onChange={(e) => setFormState(prev => ({
-                ...prev,
-                contact_whatsapp: e.target.checked
-              }))}
-              className="text-green-500 focus:ring-green-400 rounded"
-            />
-            <span className="ml-3 flex items-center gap-2">
-              <BsWhatsapp className="w-5 h-5 text-green-500" />
-              WhatsApp
-            </span>
-          </motion.label>
-          
-          <motion.label 
-            whileHover={{ scale: 1.01 }}
-            className={clsx(
-              "flex items-center p-4 rounded-xl cursor-pointer transition-colors",
-              formState.contact_call ? "bg-brand-50" : "bg-gray-50"
-            )}
-          >
-            <input
-              type="checkbox"
-              checked={formState.contact_call}
-              onChange={(e) => setFormState(prev => ({
-                ...prev,
-                contact_call: e.target.checked
-              }))}
-              className="text-brand-600 focus:ring-brand-500 rounded"
-            />
-            <span className="ml-3 flex items-center gap-2">
-              <PhoneIcon className="w-5 h-5" />
-              Phone Call
-            </span>
-          </motion.label>
+        {/* Contact Preferences - More Compact */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            How can buyers contact you?
+          </label>
+          <div className="flex gap-4">
+            <label className={clsx(
+              "flex-1 flex items-center p-3 rounded-lg cursor-pointer transition-colors border",
+              formState.contact_whatsapp 
+                ? "bg-green-50 border-green-200 text-green-700" 
+                : "bg-white hover:border-gray-300"
+            )}>
+              <input
+                type="checkbox"
+                checked={formState.contact_whatsapp}
+                onChange={(e) => setFormState(prev => ({
+                  ...prev,
+                  contact_whatsapp: e.target.checked
+                }))}
+                className="text-green-500 focus:ring-green-400 rounded"
+              />
+              <span className="ml-2 flex items-center gap-2 text-sm">
+                <BsWhatsapp className="w-4 h-4" />
+                WhatsApp
+              </span>
+            </label>
+
+            <label className={clsx(
+              "flex-1 flex items-center p-3 rounded-lg cursor-pointer transition-colors border",
+              formState.contact_call 
+                ? "bg-brand-50 border-brand-200 text-brand-700" 
+                : "bg-white hover:border-gray-300"
+            )}>
+              <input
+                type="checkbox"
+                checked={formState.contact_call}
+                onChange={(e) => setFormState(prev => ({
+                  ...prev,
+                  contact_call: e.target.checked
+                }))}
+                className="text-brand-600 focus:ring-brand-500 rounded"
+              />
+              <span className="ml-2 flex items-center gap-2 text-sm">
+                <PhoneIcon className="w-4 h-4" />
+                Phone Call
+              </span>
+            </label>
+          </div>
         </div>
       </div>
 
@@ -552,7 +550,7 @@ const ContactOptionsSection = ({ formState, setFormState, user }: ContactOptions
         <motion.p 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="text-red-500 text-sm"
+          className="text-sm text-red-500"
         >
           Please select at least one contact method
         </motion.p>
@@ -582,12 +580,56 @@ const Logo = () => (
   </span>
 )
 
-// Add this new component for the listing details form
-const ListingDetailsForm = ({ formState, setFormState }) => {
+// Update the ListingDetailsForm component
+const ListingDetailsForm = ({ 
+  formState, 
+  setFormState, 
+  showErrors = false  // New prop to control error display
+}) => {
   // Local state for input values
   const [title, setTitle] = useState(formState.title)
   const [description, setDescription] = useState(formState.description)
   const [price, setPrice] = useState(formState.displayPrice)
+  const [errors, setErrors] = useState({
+    title: '',
+    description: '',
+    price: ''
+  })
+
+  // Update errors when showErrors changes
+  useEffect(() => {
+    if (showErrors) {
+      const newErrors = {
+        title: !title.trim() 
+          ? 'Title is required' 
+          : title.length < 10 
+            ? 'Title must be at least 10 characters' 
+            : '',
+        description: !description.trim() 
+          ? 'Description is required' 
+          : description.length < 30 
+            ? 'Description must be at least 30 characters' 
+            : '',
+        price: !price 
+          ? 'Price is required' 
+          : parseInt(price.replace(/[^\d]/g, '')) <= 0 
+            ? 'Please enter a valid price' 
+            : ''
+      }
+      setErrors(newErrors)
+    }
+  }, [showErrors, title, description, price])
+
+  // Format price as user types
+  const handlePriceChange = (value: string) => {
+    const numericValue = value.replace(/[^\d]/g, '')
+    if (numericValue) {
+      const formattedValue = new Intl.NumberFormat('fr-FR').format(parseInt(numericValue))
+      setPrice(formattedValue)
+    } else {
+      setPrice('')
+    }
+  }
 
   // Update parent state on blur
   const handleBlur = () => {
@@ -600,54 +642,74 @@ const ListingDetailsForm = ({ formState, setFormState }) => {
     }))
   }
 
-  // Format price as user types
-  const handlePriceChange = (value: string) => {
-    const numericValue = value.replace(/[^\d]/g, '')
-    const displayValue = numericValue ? parseInt(numericValue).toLocaleString('fr-FR') : ''
-    setPrice(displayValue)
-  }
-
   return (
     <div className="space-y-8">
       <div>
         <h2 className="text-2xl font-semibold mb-6">Add Listing Details</h2>
         <div className="space-y-6">
           <div>
-            <label className="block text-sm font-medium mb-2">Title</label>
+            <label className="block text-sm font-medium mb-2">
+              Title <span className="text-red-500">*</span>
+            </label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               onBlur={handleBlur}
-              className="w-full px-4 py-3 text-lg border rounded-xl focus:ring-2 focus:ring-brand-500"
+              className={clsx(
+                "w-full px-4 py-3 text-lg border rounded-xl focus:ring-2 focus:ring-brand-500",
+                errors.title && "border-red-500"
+              )}
               placeholder="Short and descriptive title"
+              required
             />
+            {errors.title && (
+              <p className="mt-1 text-sm text-red-500">{errors.title}</p>
+            )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Description</label>
+            <label className="block text-sm font-medium mb-2">
+              Description <span className="text-red-500">*</span>
+            </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               onBlur={handleBlur}
               rows={6}
-              className="w-full px-4 py-3 text-lg border rounded-xl focus:ring-2 focus:ring-brand-500"
+              className={clsx(
+                "w-full px-4 py-3 text-lg border rounded-xl focus:ring-2 focus:ring-brand-500",
+                errors.description && "border-red-500"
+              )}
               placeholder="Include detailed features, specifications, condition, and any additional information"
+              required
             />
+            {errors.description && (
+              <p className="mt-1 text-sm text-red-500">{errors.description}</p>
+            )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Price (FCFA)</label>
+            <label className="block text-sm font-medium mb-2">
+              Price (FCFA) <span className="text-red-500">*</span>
+            </label>
             <input
               type="text"
               inputMode="numeric"
-              pattern="[0-9]*"
+              pattern="[0-9,]*"
               value={price}
               onChange={(e) => handlePriceChange(e.target.value)}
               onBlur={handleBlur}
-              className="w-full px-4 py-3 text-lg border rounded-xl focus:ring-2 focus:ring-brand-500"
+              className={clsx(
+                "w-full px-4 py-3 text-lg border rounded-xl focus:ring-2 focus:ring-brand-500",
+                errors.price && "border-red-500"
+              )}
               placeholder="Enter price"
+              required
             />
+            {errors.price && (
+              <p className="mt-1 text-sm text-red-500">{errors.price}</p>
+            )}
           </div>
         </div>
       </div>
@@ -658,11 +720,10 @@ const ListingDetailsForm = ({ formState, setFormState }) => {
 export default function PostAdPage() {
   const router = useRouter()
   const { user } = useAuth()
+  const { categoriesTree, locationsTree } = useData()
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [images, setImages] = useState<File[]>([])
-  const [categoriesTree, setCategoriesTree] = useState<CategoryWithChildren[]>([])
-  const [locationsTree, setLocationsTree] = useState<LocationWithChildren[]>([])
   const [selectedSubcategory, setSelectedSubcategory] = useState<CategoryWithChildren | null>(null)
   const [selectedSubLocation, setSelectedSubLocation] = useState<LocationWithChildren | null>(null)
   const [formState, setFormState] = useState<FormState>({
@@ -681,54 +742,6 @@ export default function PostAdPage() {
     contact_call: true
   })
   const [uploadProgress, setUploadProgress] = useState(0)
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const [{ data: categoriesData }, { data: locationsData }] = await Promise.all([
-          supabase.from('categories').select('*').order('name'),
-          supabase.from('locations').select('*').order('name')
-        ])
-
-        if (categoriesData && locationsData) {
-          // Build category tree
-          const categoryTree = buildTree(categoriesData)
-          setCategoriesTree(categoryTree)
-
-          // Build location tree
-          const locationTree = buildTree(locationsData)
-          setLocationsTree(locationTree)
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error)
-        toast.error('Failed to load categories and locations')
-      }
-    }
-
-    fetchData()
-  }, [])
-
-  // Helper function to build tree structure
-  const buildTree = (items: any[]) => {
-    const itemMap = {}
-    const roots = []
-
-    // First pass: create nodes
-    items.forEach(item => {
-      itemMap[item.id] = { ...item, children: [] }
-    })
-
-    // Second pass: create relationships
-    items.forEach(item => {
-      if (item.parent_id && itemMap[item.parent_id]) {
-        itemMap[item.parent_id].children.push(itemMap[item.id])
-      } else if (!item.parent_id) { // Only add to roots if no parent_id
-        roots.push(itemMap[item.id])
-      }
-    })
-
-    return roots
-  }
 
   const handleCategorySelect = (category: CategoryWithChildren) => {
     setSelectedSubcategory(null)
@@ -772,27 +785,17 @@ export default function PostAdPage() {
   }
 
   const handleSubmit = async () => {
-    setLoading(true)
-
+    console.log('Starting submission process...')
     try {
-      // Validate form data first
-      if (!formState.title.trim()) {
-        throw new Error('Title is required')
-      }
-      if (!formState.description.trim()) {
-        throw new Error('Description is required')
-      }
-      if (!formState.category_id) {
-        throw new Error('Please select a category')
-      }
-      if (!formState.location_id) {
-        throw new Error('Please select a location')
-      }
-      if (!formState.price || parseInt(formState.price) <= 0) {
-        throw new Error('Please enter a valid price')
+      if (!user) {
+        console.error('No user found')
+        toast.error('Please sign in to post a listing')
+        return
       }
 
-      // Check if user exists in users table
+      setLoading(true)
+
+      // First get the user's ID from our users table
       const { data: userData, error: userError } = await supabase
         .from('users')
         .select('id')
@@ -800,119 +803,98 @@ export default function PostAdPage() {
         .single()
 
       if (userError) {
-        toast.error('Please complete your profile setup before creating a listing')
-        router.push('/profile/setup') // Redirect to profile setup if needed
+        console.error('Error getting user data:', userError)
+        toast.error('Error getting user data')
+        setLoading(false)
         return
       }
 
-      if (!validateContactOptions(formState)) return
-
-      // Create the listing with the user's ID from users table
-      const listingData = {
-        user_id: userData.id,
-        title: formState.title,
-        description: formState.description,
-        price: parseInt(formState.price),
-        currency: formState.currency,
-        category_id: parseInt(formState.category_id),
-        location_id: parseInt(formState.location_id),
-        status: 'pending',
-        contact_number: formState.use_profile_number ? 
-          user?.user_metadata.phone : 
-          formState.contact_number,
-        contact_whatsapp: formState.contact_whatsapp,
-        contact_call: formState.contact_call,
-        use_profile_number: formState.use_profile_number
+      if (!userData) {
+        console.error('No user found in users table')
+        toast.error('User profile not found')
+        setLoading(false)
+        return
       }
 
+      // Then create the listing with the correct user_id
       const { data: listing, error: listingError } = await supabase
         .from('listings')
-        .insert(listingData)
-        .select(`
-          *,
-          categories (
-            name
-          ),
-          locations (
-            name
-          ),
-          users (
-            id,
-            name,
-            email,
-            profile_picture,
-            role,
-            phone
-          )
-        `)
+        .insert([{
+          title: formState.title,
+          description: formState.description,
+          price: formState.price,
+          category_id: formState.category_id,
+          location_id: formState.location_id,
+          user_id: userData.id, // Use the integer ID from users table
+          contact_number: formState.use_profile_number ? 
+            user.user_metadata.phone : 
+            formState.contact_number,
+          contact_whatsapp: formState.contact_whatsapp,
+          contact_call: formState.contact_call,
+          use_profile_number: formState.use_profile_number,
+          status: 'active'
+        }])
+        .select()
         .single()
 
       if (listingError) {
-        console.error('Error creating listing:', listingError)
         throw listingError
       }
 
-      // Upload images if any
-      if (images.length > 0) {
+      // Process all images in parallel
+      const imagePromises = images.map(async (image, index) => {
         try {
-          setUploadProgress(10)
+          // Process image
+          const processedImage = await processImage(image)
+          
+          // Upload to storage
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('listing_images')
+            .upload(
+              `${user.id}/${listing.id}/${Date.now()}-${index}`, 
+              processedImage, 
+              { cacheControl: '3600', contentType: 'image/jpeg' }
+            )
 
-          // Process images sequentially to avoid memory issues
-          const processedImages = []
-          for (const file of images) {
-            const processed = await processImage(file)
-            processedImages.push(processed)
-            setUploadProgress(prev => prev + (30 / images.length))
-          }
+          if (uploadError) throw uploadError
 
-          // Upload processed images
-          let completedUploads = 0
-          const imageUploads = processedImages.map(async (file, index) => {
-            try {
-              const fileName = `${Date.now()}-${index}.jpg`
-              const filePath = `${user.id}/${listing.id}/${fileName}`
+          // Get public URL
+          const { data: { publicUrl } } = supabase.storage
+            .from('listing_images')
+            .getPublicUrl(uploadData.path)
 
-              const { error: uploadError } = await supabase.storage
-                .from('listing_images')
-                .upload(filePath, file, {
-                  cacheControl: '3600',
-                  upsert: false
-                })
+          // Create image record
+          const { error: imageRecordError } = await supabase
+            .from('listing_images')
+            .insert([{
+              listing_id: listing.id,
+              image_url: publicUrl,
+              caption: `Image ${index + 1}`
+            }])
 
-              if (uploadError) throw uploadError
+          if (imageRecordError) throw imageRecordError
 
-              completedUploads++
-              setUploadProgress(40 + Math.round((completedUploads / images.length) * 60))
-
-              const { data: { publicUrl } } = supabase.storage
-                .from('listing_images')
-                .getPublicUrl(filePath)
-
-              return supabase
-                .from('listing_images')
-                .insert({
-                  listing_id: listing.id,
-                  image_url: publicUrl,
-                })
-            } catch (error) {
-              console.error('Error uploading image:', error)
-              throw error
-            }
-          })
-
-          await Promise.all(imageUploads)
-          setUploadProgress(100)
+          return true
         } catch (error) {
-          console.error('Error processing images:', error)
-          throw error
+          console.error(`Error processing image ${index}:`, error)
+          return false
         }
+      })
+
+      // Wait for all images to be processed and uploaded
+      const results = await Promise.all(imagePromises)
+      
+      // Check if any images failed
+      if (results.some(result => !result)) {
+        toast.error('Some images failed to upload')
+      } else {
+        toast.success('Listing created successfully!')
+        router.push('/')
       }
 
-      toast.success('Listing created successfully!')
-      router.push(`/post-ad/success?id=${listing.id}`)
     } catch (error) {
       console.error('Error creating listing:', error)
-      toast.error(error.message || 'Failed to create listing')
+      toast.error('Failed to create listing')
     } finally {
       setLoading(false)
     }
@@ -921,15 +903,25 @@ export default function PostAdPage() {
   const validateStep = (currentStep: number) => {
     switch (currentStep) {
       case 1:
+        // Check if all required fields are filled
         if (!formState.title.trim()) {
           toast.error('Please enter a title')
+          return false
+        }
+        if (formState.title.length < 10) {
+          toast.error('Title must be at least 10 characters')
           return false
         }
         if (!formState.description.trim()) {
           toast.error('Please enter a description')
           return false
         }
-        if (!validateContactOptions(formState)) {
+        if (formState.description.length < 30) {
+          toast.error('Description must be at least 30 characters')
+          return false
+        }
+        if (!formState.price || parseInt(formState.price) <= 0) {
+          toast.error('Please enter a valid price')
           return false
         }
         return true
@@ -939,15 +931,25 @@ export default function PostAdPage() {
           toast.error('Please select a category')
           return false
         }
-        if (!formState.location_id) {
-          toast.error('Please select a location')
+        // Check if the selected category has subcategories but none is selected
+        if (formState.selectedCategory?.children?.length > 0 && 
+            !formState.selectedCategory.children.some(sub => sub.id.toString() === formState.category_id)) {
+          toast.error('Please select a subcategory')
           return false
         }
         return true
 
       case 3:
+        if (!formState.location_id) {
+          toast.error('Please select a location')
+          return false
+        }
         if (!formState.use_profile_number && !formState.contact_number) {
           toast.error('Please enter a contact number')
+          return false
+        }
+        if (!formState.contact_whatsapp && !formState.contact_call) {
+          toast.error('Please select at least one contact method')
           return false
         }
         return true
@@ -967,10 +969,26 @@ export default function PostAdPage() {
     }
   }
 
+  const handleNextStep = () => {
+    // Set validation attempted flag
+    setFormState(prev => ({ ...prev, validationAttempted: true }))
+    
+    if (validateStep(step)) {
+      setFormState(prev => ({ ...prev, validationAttempted: false }))
+      setStep(step + 1)
+    }
+  }
+
   const renderStepContent = () => {
     switch (step) {
       case 1:
-        return <ListingDetailsForm formState={formState} setFormState={setFormState} />
+        return (
+          <ListingDetailsForm 
+            formState={formState} 
+            setFormState={setFormState} 
+            showErrors={!!formState.validationAttempted}  // New prop
+          />
+        )
 
       case 2:
         return (
@@ -1108,99 +1126,124 @@ export default function PostAdPage() {
               )}
             </div>
 
-            {/* Contact Options */}
+            {/* Contact Methods */}
             <div className="space-y-6">
               <h3 className="text-lg font-medium">Contact Methods</h3>
               
-              {/* Phone Number */}
-              <div className="space-y-4">
-                <label className="block text-sm font-medium">Phone Number</label>
+              <div className="bg-gray-50 rounded-xl p-6 space-y-6">
+                {/* Phone Number Selection - More Compact */}
                 <div className="space-y-3">
-                  <label className="flex items-center p-4 bg-gray-50 rounded-xl">
-                    <input
-                      type="radio"
-                      checked={formState.use_profile_number}
-                      onChange={() => setFormState(prev => ({
-                        ...prev,
-                        use_profile_number: true,
-                        contact_number: user?.user_metadata.phone || ''
-                      }))}
-                      className="text-brand-600"
-                    />
-                    <span className="ml-3">Use my profile number ({user?.user_metadata.phone || 'Not set'})</span>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Phone Number
                   </label>
+                  <div className="flex gap-4">
+                    <label className="flex-1 flex items-center p-3 bg-white rounded-lg border hover:border-brand-500 cursor-pointer transition-colors">
+                      <input
+                        type="radio"
+                        checked={formState.use_profile_number}
+                        onChange={() => setFormState(prev => ({
+                          ...prev,
+                          use_profile_number: true,
+                          contact_number: user?.user_metadata.phone || ''
+                        }))}
+                        className="text-brand-600 focus:ring-brand-500"
+                      />
+                      <span className="ml-2 text-sm">Profile: {user?.user_metadata.phone || 'Not set'}</span>
+                    </label>
 
-                  <label className="flex items-center p-4 bg-gray-50 rounded-xl">
-                    <input
-                      type="radio"
-                      checked={!formState.use_profile_number}
-                      onChange={() => setFormState(prev => ({
-                        ...prev,
-                        use_profile_number: false
-                      }))}
-                      className="text-brand-600"
-                    />
-                    <span className="ml-3">Use a different number</span>
-                  </label>
+                    <label className="flex-1 flex items-center p-3 bg-white rounded-lg border hover:border-brand-500 cursor-pointer transition-colors">
+                      <input
+                        type="radio"
+                        checked={!formState.use_profile_number}
+                        onChange={() => setFormState(prev => ({
+                          ...prev,
+                          use_profile_number: false
+                        }))}
+                        className="text-brand-600 focus:ring-brand-500"
+                      />
+                      <span className="ml-2 text-sm">Different number</span>
+                    </label>
+                  </div>
 
                   {!formState.use_profile_number && (
-                    <input
-                      type="tel"
-                      value={formState.contact_number}
-                      onChange={(e) => setFormState(prev => ({
-                        ...prev,
-                        contact_number: e.target.value
-                      }))}
-                      placeholder="Enter phone number"
-                      className="w-full px-4 py-3 border rounded-xl"
-                    />
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                    >
+                      <input
+                        type="tel"
+                        value={formState.contact_number}
+                        onChange={(e) => setFormState(prev => ({
+                          ...prev,
+                          contact_number: e.target.value
+                        }))}
+                        placeholder="Enter phone number"
+                        className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-brand-500"
+                      />
+                    </motion.div>
                   )}
                 </div>
-              </div>
 
-              {/* Contact Methods */}
-              <div className="space-y-4">
-                <label className="block text-sm font-medium">Preferred Contact Methods</label>
-                <div className="grid grid-cols-2 gap-4">
-                  <label className={clsx(
-                    "flex items-center p-4 rounded-xl cursor-pointer transition-colors",
-                    formState.contact_whatsapp ? "bg-green-50" : "bg-gray-50"
-                  )}>
-                    <input
-                      type="checkbox"
-                      checked={formState.contact_whatsapp}
-                      onChange={(e) => setFormState(prev => ({
-                        ...prev,
-                        contact_whatsapp: e.target.checked
-                      }))}
-                      className="text-green-500"
-                    />
-                    <span className="ml-3 flex items-center gap-2">
-                      <BsWhatsapp className="w-5 h-5 text-green-500" />
-                      WhatsApp
-                    </span>
+                {/* Contact Preferences - More Compact */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    How can buyers contact you?
                   </label>
+                  <div className="flex gap-4">
+                    <label className={clsx(
+                      "flex-1 flex items-center p-3 rounded-lg cursor-pointer transition-colors border",
+                      formState.contact_whatsapp 
+                        ? "bg-green-50 border-green-200 text-green-700" 
+                        : "bg-white hover:border-gray-300"
+                    )}>
+                      <input
+                        type="checkbox"
+                        checked={formState.contact_whatsapp}
+                        onChange={(e) => setFormState(prev => ({
+                          ...prev,
+                          contact_whatsapp: e.target.checked
+                        }))}
+                        className="text-green-500 focus:ring-green-400 rounded"
+                      />
+                      <span className="ml-2 flex items-center gap-2 text-sm">
+                        <BsWhatsapp className="w-4 h-4" />
+                        WhatsApp
+                      </span>
+                    </label>
 
-                  <label className={clsx(
-                    "flex items-center p-4 rounded-xl cursor-pointer transition-colors",
-                    formState.contact_call ? "bg-brand-50" : "bg-gray-50"
-                  )}>
-                    <input
-                      type="checkbox"
-                      checked={formState.contact_call}
-                      onChange={(e) => setFormState(prev => ({
-                        ...prev,
-                        contact_call: e.target.checked
-                      }))}
-                      className="text-brand-600"
-                    />
-                    <span className="ml-3 flex items-center gap-2">
-                      <PhoneIcon className="w-5 h-5" />
-                      Phone Call
-                    </span>
-                  </label>
+                    <label className={clsx(
+                      "flex-1 flex items-center p-3 rounded-lg cursor-pointer transition-colors border",
+                      formState.contact_call 
+                        ? "bg-brand-50 border-brand-200 text-brand-700" 
+                        : "bg-white hover:border-gray-300"
+                    )}>
+                      <input
+                        type="checkbox"
+                        checked={formState.contact_call}
+                        onChange={(e) => setFormState(prev => ({
+                          ...prev,
+                          contact_call: e.target.checked
+                        }))}
+                        className="text-brand-600 focus:ring-brand-500 rounded"
+                      />
+                      <span className="ml-2 flex items-center gap-2 text-sm">
+                        <PhoneIcon className="w-4 h-4" />
+                        Phone Call
+                      </span>
+                    </label>
+                  </div>
                 </div>
               </div>
+
+              {!formState.contact_whatsapp && !formState.contact_call && (
+                <motion.p 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-sm text-red-500"
+                >
+                  Please select at least one contact method
+                </motion.p>
+              )}
             </div>
           </div>
         )
@@ -1219,21 +1262,56 @@ export default function PostAdPage() {
 
       case 5:
         return (
-          <div className="space-y-8">
-            <h2 className="text-2xl font-semibold mb-6">Review & Publish</h2>
-            <ListingPreview formData={formState} images={images} />
-            <div className="flex justify-end">
-              <button
-                onClick={handleSubmit}
-                disabled={loading}
-                className={clsx(
-                  "px-8 py-3 bg-brand-600 text-white rounded-xl font-medium",
-                  "hover:bg-brand-700 transition-colors",
-                  loading && "opacity-50 cursor-not-allowed"
-                )}
-              >
-                {loading ? 'Publishing...' : 'Publish Listing'}
-              </button>
+          <div className="container mx-auto px-4 py-12">
+            <div className="max-w-3xl mx-auto">
+              <div className="bg-white rounded-2xl shadow-sm p-8">
+                <form 
+                  onSubmit={async (e) => {
+                    console.log('Form submitted')
+                    e.preventDefault()
+                    await handleSubmit()
+                  }}
+                  className="space-y-8"
+                >
+                  <h2 className="text-2xl font-semibold mb-6">
+                    Review & Publish
+                  </h2>
+                  <ListingPreview formData={formState} images={images} />
+
+                  <div className="flex justify-center pt-8 border-t">
+                    <button
+                      type="button"
+                      onClick={() => setStep(step - 1)}
+                      className="flex items-center px-6 py-3 text-lg font-medium text-gray-700 hover:text-brand-600 transition-colors mr-4"
+                    >
+                      <ArrowLeftIcon className="w-5 h-5 mr-2" />
+                      Back
+                    </button>
+
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className={clsx(
+                        "flex items-center px-8 py-3 text-lg font-medium",
+                        "bg-brand-600 text-white rounded-xl",
+                        "hover:bg-brand-700 transition-colors",
+                        "disabled:opacity-50 disabled:cursor-not-allowed"
+                      )}
+                    >
+                      {loading ? (
+                        <div className="flex items-center">
+                          <span className="mr-2">Publishing...</span>
+                          {uploadProgress > 0 && (
+                            <span className="text-sm">({uploadProgress}%)</span>
+                          )}
+                        </div>
+                      ) : (
+                        "Publish Listing"
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
         )
@@ -1245,21 +1323,18 @@ export default function PostAdPage() {
 
   const MainContent = () => {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 -mt-4">
         <div className="sticky top-0 z-10 bg-white">
           <div className="container mx-auto px-4 flex items-center space-x-12">
-            {/* Logo */}
             <Link href="/" className="flex-shrink-0">
               <Logo />
             </Link>
 
-            {/* Steps - using flex-grow to take remaining space */}
             <div className="flex-grow">
               <StepIndicator currentStep={step} steps={STEPS} />
             </div>
 
-            {/* Close button */}
-            <Link 
+            <Link
               href="/"
               className="flex-shrink-0 p-2.5 hover:bg-gray-100 rounded-full transition-colors"
             >
@@ -1268,66 +1343,103 @@ export default function PostAdPage() {
           </div>
         </div>
 
-        <div className="flex">
-          <LeftPanel currentStep={step} steps={STEPS} />
+        {step === STEPS.length ? (
+          <div className="container mx-auto px-4 py-12 ">
+            <div className="max-w-3xl mx-auto">
+              <div className="bg-white rounded-2xl shadow-sm p-8">
+                <form onSubmit={(e) => {
+                  e.preventDefault()
+                  handleSubmit()
+                }}>
+                  <div className="space-y-8">
+                    <h2 className="text-2xl font-semibold mb-6">
+                      Review & Publish
+                    </h2>
+                    <ListingPreview formData={formState} images={images} />
 
-          <div className="w-2/3 p-12">
-            <div className="max-w-2xl mx-auto">
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-8">
-                <form onSubmit={(e) => e.preventDefault()} className="min-h-[400px] flex flex-col">
-                  <div className="flex-1">
-                    {renderStepContent()}
-                  </div>
-
-                  {/* Fixed position navigation buttons */}
-                  <div className="sticky bottom-0 left-0 right-0 flex justify-between mt-8 pt-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-                    {step > 1 && (
+                    <div className="flex justify-center pt-8 border-t">
                       <button
                         type="button"
                         onClick={() => setStep(step - 1)}
-                        className="flex items-center px-6 py-3 text-lg font-medium text-gray-700 dark:text-gray-200 hover:text-brand-600 transition-colors"
+                        className="flex items-center px-6 py-3 text-lg font-medium text-gray-700 hover:text-brand-600 transition-colors mr-4"
                       >
                         <ArrowLeftIcon className="w-5 h-5 mr-2" />
                         Back
                       </button>
-                    )}
-                    
-                    {step < STEPS.length ? (
+
                       <button
-                        type="button"
-                        onClick={() => setStep(step + 1)}
-                        className="flex items-center ml-auto px-8 py-3 text-lg font-medium text-white bg-brand-600 rounded-xl hover:bg-brand-700 transition-colors"
-                      >
-                        Next
-                        <ArrowRightIcon className="w-5 h-5 ml-2" />
-                      </button>
-                    ) : (
-          <button
-                        type="button"
-                        onClick={handleSubmit}
+                        type="submit"
                         disabled={loading}
-                        className="flex items-center ml-auto px-8 py-3 text-lg font-medium text-white bg-brand-600 rounded-xl hover:bg-brand-700 transition-colors disabled:opacity-50"
+                        className={clsx(
+                          "flex items-center px-8 py-3 text-lg font-medium",
+                          "bg-brand-600 text-white rounded-xl",
+                          "hover:bg-brand-700 transition-colors",
+                          "disabled:opacity-50 disabled:cursor-not-allowed"
+                        )}
                       >
                         {loading ? (
                           <div className="flex items-center">
-                            <span className="mr-2">Creating...</span>
+                            <span className="mr-2">Publishing...</span>
                             {uploadProgress > 0 && (
                               <span className="text-sm">({uploadProgress}%)</span>
                             )}
                           </div>
                         ) : (
-                          'Create Listing'
+                          "Publish Listing"
                         )}
-          </button>
-                    )}
-        </div>
-      </form>
-    </div>
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex">
+            <LeftPanel currentStep={step} steps={STEPS} />
+
+            <div className="w-2/3 p-12">
+              <div className="max-w-2xl mx-auto">
+                <div className="bg-white rounded-2xl shadow-sm p-8">
+                  <form
+                    onSubmit={(e) => e.preventDefault()}
+                    className="min-h-[400px] flex flex-col"
+                  >
+                    <div className="flex-1">{renderStepContent()}</div>
+
+                    <div className="sticky bottom-0 left-0 right-0 flex justify-between mt-8 pt-4 border-t border-gray-200 bg-white">
+                      {step > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => setStep(step - 1)}
+                          className="flex items-center px-6 py-3 text-lg font-medium text-gray-700 hover:text-brand-600 transition-colors"
+                        >
+                          <ArrowLeftIcon className="w-5 h-5 mr-2" />
+                          Back
+                        </button>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={handleNextStep}
+                        className={clsx(
+                          "flex items-center px-6 py-3 rounded-lg font-medium transition-all",
+                          "bg-brand-600 text-white hover:bg-brand-700",
+                          "disabled:opacity-50 disabled:cursor-not-allowed"
+                        )}
+                      >
+                        Next
+                        <ArrowRightIcon className="w-5 h-5 ml-2" />
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-    )
+    );
   }
 
   if (!user) {

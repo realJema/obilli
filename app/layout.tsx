@@ -7,6 +7,7 @@ import { ThemeProvider } from '@/contexts/ThemeContext'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { headers } from 'next/headers'
 import PageWrapper from '@/components/layouts/PageWrapper'
+import { DataProvider } from '@/contexts/DataContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -39,9 +40,11 @@ export default function RootLayout({
       <body className={`${inter.className} bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-all duration-300`}>
         <AuthProvider>
           <ThemeProvider>
-            <PageWrapper>
-              {children}
-            </PageWrapper>
+            <DataProvider>
+              <PageWrapper>
+                {children}
+              </PageWrapper>
+            </DataProvider>
           </ThemeProvider>
         </AuthProvider>
       </body>
