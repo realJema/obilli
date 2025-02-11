@@ -8,16 +8,16 @@ import { DEFAULT_IMAGES } from '@/lib/constants'
 interface ListingCardProps {
   listing: {
     id: number
-    title?: string
+    title: string
     description?: string
     price?: number | null
     currency?: string
-    created_at?: string
-    categories?: { name: string }
-    locations?: { name: string }
+    created_at: string
+    categories: { name: string }[]
+    locations: { name: string }[]
     listing_images?: { image_url: string }[]
-    users?: {
-      id: string
+    users: {
+      id: number
       name: string | null
       profile_picture: string | null
       role: string | null
@@ -46,8 +46,8 @@ export default function ListingCard({ listing }: ListingCardProps) {
   }
 
   // Add safety checks for category and location
-  const categoryName = listing?.categories?.name || 'Uncategorized'
-  const locationName = listing?.locations?.name || 'Location not specified'
+  const categoryName = listing?.categories?.[0]?.name || 'Uncategorized'
+  const locationName = listing?.locations?.[0]?.name || 'Location not specified'
 
   if (!listing) {
     return null // Or return a placeholder card

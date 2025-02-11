@@ -6,9 +6,15 @@ import ListingCard from '@/components/ListingCard'
 import Reviews from '@/components/Reviews'
 import UserAvatar from '@/components/UserAvatar'
 import BackButton from '@/components/BackButton'
+import { Review } from '@/types/reviews'
 
 const DEFAULT_AVATAR = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'
 const DEFAULT_COVER = 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80'
+
+interface ListingImage {
+  id: number
+  image_url: string
+}
 
 async function getListing(id: string) {
   const { data: listing, error } = await supabase
@@ -55,16 +61,17 @@ async function getRelatedListings(categoryId: number, currentListingId: number) 
       price,
       currency,
       created_at,
-      categories (
+      categories:categories!inner (
         name
       ),
-      locations (
+      locations:locations!inner (
         name
       ),
       listing_images (
         image_url
       ),
-      users (
+      users:users!inner (
+        id,
         name,
         role,
         profile_picture
@@ -74,7 +81,12 @@ async function getRelatedListings(categoryId: number, currentListingId: number) 
     .neq('id', currentListingId)
     .limit(5)
 
-  return listings || []
+  return listings?.map(listing => ({
+    ...listing,
+    users: Array.isArray(listing.users) ? listing.users[0] : listing.users,
+    categories: Array.isArray(listing.categories) ? listing.categories : [listing.categories],
+    locations: Array.isArray(listing.locations) ? listing.locations : [listing.locations]
+  })) || []
 }
 
 async function getListingReviews(listingId: string) {
@@ -85,21 +97,27 @@ async function getListingReviews(listingId: string) {
       rating,
       comment,
       created_at,
-      reviewer:reviewer_id (
+      updated_at,
+      parent_id,
+      reviewer_id,
+      seller_id,
+      reviewer:users!reviewer_id (
         id,
         name,
-        profile_picture
+        profile_picture,
+        role
       )
     `)
     .eq('listing_id', listingId)
     .order('created_at', { ascending: false })
+    .returns<Review[]>()
 
   if (error) {
     console.error('Error fetching reviews:', error)
     return []
   }
 
-  return reviews
+  return reviews || []
 }
 
 export default async function ListingDetails({
@@ -198,7 +216,7 @@ export default async function ListingDetails({
             </div>
             {listing.listing_images.length > 1 && (
               <div className="grid grid-cols-5 gap-2">
-                {listing.listing_images.slice(1).map((image) => (
+                {listing.listing_images.slice(1).map((image: ListingImage) => (
                   <div key={image.id} className="relative aspect-square">
                     <Image
                       src={image.image_url}
@@ -221,9 +239,9 @@ export default async function ListingDetails({
 
           {/* Reviews Section */}
           <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-            <Reviews 
+            <Reviews
               listingId={parseInt(params.id)}
-              reviews={reviews}
+              initialReviews={reviews}
               sellerId={listing.user_id}
             />
           </div>
@@ -314,9 +332,17 @@ export default async function ListingDetails({
             {relatedListings.map((relatedListing) => (
               <div key={relatedListing.id} className="w-full">
                 <ListingCard 
-                  ad={{
+                  listing={{
                     ...relatedListing,
-                    user: relatedListing.users
+                    users: Array.isArray(relatedListing.users) 
+                      ? relatedListing.users[0] 
+                      : relatedListing.users,
+                    categories: Array.isArray(relatedListing.categories)
+                      ? relatedListing.categories
+                      : [relatedListing.categories],
+                    locations: Array.isArray(relatedListing.locations)
+                      ? relatedListing.locations
+                      : [relatedListing.locations]
                   }}
                 />
               </div>

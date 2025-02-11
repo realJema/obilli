@@ -11,14 +11,27 @@ interface AuthModalProps {
   initialMode?: 'signin' | 'signup'
 }
 
+// Add a type for possible roles
+type UserRole = 'buyer' | 'seller'
+
+// Update the form data state type
+const [formData, setFormData] = useState({
+  email: '',
+  password: '',
+  name: '',
+  role: 'buyer' as UserRole  // Use the union type
+})
+
+// Update the interface if you have one
+interface AuthFormData {
+  email: string
+  password: string
+  name: string
+  role: UserRole
+}
+
 export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: AuthModalProps) {
   const [mode, setMode] = useState<'signin' | 'signup'>(initialMode)
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    name: '',
-    role: 'buyer' as const
-  })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const { signIn, signUp } = useAuth()
@@ -50,7 +63,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: A
       onClose()
     } catch (err) {
       console.error('Auth error:', err)
-      setError(err.message)
+      setError((err as Error).message || 'An unexpected error occurred')
     } finally {
       setLoading(false)
     }
@@ -135,7 +148,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: A
                   <div className="grid grid-cols-2 gap-4 mt-1">
                     <button
                       type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, role: 'buyer' }))}
+                      onClick={() => setFormData(prev => ({ ...prev, role: 'buyer' as UserRole }))}
                       className={`px-4 py-2 rounded-lg border-2 transition-colors ${
                         formData.role === 'buyer'
                           ? 'border-brand-600 bg-brand-50 dark:bg-brand-900/20 text-brand-600'
@@ -146,7 +159,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: A
                     </button>
                     <button
                       type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, role: 'seller' }))}
+                      onClick={() => setFormData(prev => ({ ...prev, role: 'seller' as UserRole }))}
                       className={`px-4 py-2 rounded-lg border-2 transition-colors ${
                         formData.role === 'seller'
                           ? 'border-brand-600 bg-brand-50 dark:bg-brand-900/20 text-brand-600'

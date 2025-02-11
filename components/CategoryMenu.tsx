@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import Link from 'next/link'
 
 interface Category {
@@ -103,6 +103,13 @@ export default function CategoryMenu({ categories }: CategoryMenuProps) {
     }
   }
 
+  // Create a callback ref function
+  const setRef = useCallback((id: number) => (el: HTMLDivElement | null) => {
+    if (el) {
+      categoryRefs.current[id] = el
+    }
+  }, [])
+
   return (
     <div className="relative flex items-center">
       {/* Left Scroll Button */}
@@ -130,7 +137,7 @@ export default function CategoryMenu({ categories }: CategoryMenuProps) {
           return (
             <div
               key={category.id}
-              ref={el => categoryRefs.current[category.id] = el}
+              ref={setRef(category.id)}
               className="relative flex-shrink-0"
               onMouseEnter={() => setOpenDropdown(category.id)}
               onMouseLeave={() => setOpenDropdown(null)}

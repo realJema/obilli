@@ -23,15 +23,14 @@ export default function SignUpForm() {
 
     try {
       await signUp(formData.email, formData.password, {
-        data: {
-          name: formData.name,
-          phone: formData.phone,
-          role: formData.role,
-          bio: formData.bio
-        }
+        name: formData.name,
+        phone: formData.phone,
+        role: formData.role,
+        bio: formData.bio
       })
-    } catch (error) {
-      setError(error.message)
+    } catch (err) {
+      console.error('Sign up error:', err)
+      setError((err as Error).message || 'An unexpected error occurred')
     } finally {
       setLoading(false)
     }

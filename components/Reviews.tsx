@@ -7,26 +7,23 @@ import { formatDistanceToNow } from 'date-fns'
 import { supabase } from '@/lib/supabase'
 import { DEFAULT_IMAGES } from '@/lib/constants'
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/solid'
+import { Review as BaseReview } from '@/types/reviews'
 
-interface Review {
+// Define our Reviewer interface
+interface Reviewer {
   id: number
-  rating: number
-  comment: string
-  created_at: string
-  updated_at: string
-  parent_id: number | null
-  reviewer: {
-    id: number
-    name: string
-    profile_picture: string | null
-    role: string
-  }
-  replies?: Review[]
+  name: string | null
+  profile_picture: string | null
+  role: string
 }
 
-interface ReviewsProps {
-  listingId: number
-  sellerId: number
+// Create a new Review type that omits the reviewer property from BaseReview
+type ReviewWithoutReviewer = Omit<BaseReview, 'reviewer'>
+
+// Then create our ReviewWithReplies interface
+interface ReviewWithReplies extends ReviewWithoutReviewer {
+  reviewer: Reviewer[]  // Add our array version of reviewer
+  replies?: ReviewWithReplies[]
 }
 
 // Lift ReviewForm component outside the main component
@@ -129,9 +126,31 @@ function formatReviewTime(date: string) {
     .replace('less than a minute ago', 'just now')
 }
 
-export default function Reviews({ listingId, sellerId }: ReviewsProps) {
+// Update the component props
+interface ReviewsProps {
+  listingId: number
+  sellerId: string | number
+  initialReviews: BaseReview[]  // Use the imported type here
+}
+
+// Add a helper function to transform reviews
+function transformReview(review: BaseReview): ReviewWithReplies {
+  return {
+    ...review,
+    reviewer: [review.reviewer], // Convert single reviewer to array
+    replies: []  // Initialize empty replies array
+  }
+}
+
+export default function Reviews({ 
+  listingId, 
+  sellerId, 
+  initialReviews = [] 
+}: ReviewsProps) {
   const { user } = useAuth()
-  const [reviews, setReviews] = useState<Review[]>([])
+  const [reviews, setReviews] = useState<ReviewWithReplies[]>(
+    initialReviews.map(transformReview)
+  )
   const [showReviewForm, setShowReviewForm] = useState(false)
   const [replyingTo, setReplyingTo] = useState<number | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -152,6 +171,8 @@ export default function Reviews({ listingId, sellerId }: ReviewsProps) {
         created_at,
         updated_at,
         parent_id,
+        reviewer_id,
+        seller_id,
         reviewer:reviewer_id (
           id,
           name,
@@ -167,12 +188,21 @@ export default function Reviews({ listingId, sellerId }: ReviewsProps) {
       return
     }
 
-    // Organize reviews into threads
-    const reviewThreads = data.reduce((acc: Review[], review) => {
+    // Organize reviews into threads using the transform function
+    const reviewThreads = data.reduce((acc: ReviewWithReplies[], review) => {
       if (!review.parent_id) {
-        // This is a top-level review
-        review.replies = data.filter(r => r.parent_id === review.id)
-        acc.push(review)
+        const reviewWithReplies: ReviewWithReplies = {
+          ...review,
+          reviewer: review.reviewer,  // Already an array from Supabase
+          replies: data
+            .filter(r => r.parent_id === review.id)
+            .map(reply => ({
+              ...reply,
+              reviewer: reply.reviewer,
+              replies: []
+            }))
+        }
+        acc.push(reviewWithReplies)
       }
       return acc
     }, [])
@@ -234,8 +264,14 @@ export default function Reviews({ listingId, sellerId }: ReviewsProps) {
   const hasMoreReviews = reviews.length > 5
 
   // Update ReviewCard component
-  const ReviewCard = ({ review, isReply = false }: { review: Review, isReply?: boolean }) => {
+  const ReviewCard = ({ review, isReply = false }: { review: ReviewWithReplies, isReply?: boolean }) => {
     const [showReplies, setShowReplies] = useState(true)
+    const reviewer = review.reviewer[0] || {
+      id: 0,
+      name: null,
+      profile_picture: null,
+      role: 'user'
+    }
     const hasReplies = review.replies && review.replies.length > 0
 
     return (
@@ -243,8 +279,8 @@ export default function Reviews({ listingId, sellerId }: ReviewsProps) {
         <div className="flex items-start space-x-4">
           <div className="relative w-10 h-10 flex-shrink-0">
             <Image
-              src={review.reviewer.profile_picture || DEFAULT_IMAGES.AVATAR}
-              alt={review.reviewer.name}
+              src={reviewer.profile_picture || DEFAULT_IMAGES.AVATAR}
+              alt={reviewer.name || ''}
               fill
               className="rounded-full object-cover"
             />
@@ -252,7 +288,7 @@ export default function Reviews({ listingId, sellerId }: ReviewsProps) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-medium">{review.reviewer.name}</h4>
+                <h4 className="font-medium">{reviewer.name || 'Anonymous'}</h4>
                 {!isReply && review.rating && (
                   <div className="text-yellow-400">
                     {'★'.repeat(review.rating)}
@@ -268,47 +304,33 @@ export default function Reviews({ listingId, sellerId }: ReviewsProps) {
             </div>
             <p className="mt-2 text-gray-600">{review.comment}</p>
             
-            <div className="flex items-center mt-2 space-x-4">
-              {!isReply && user && (
-                <button
-                  onClick={() => setReplyingTo(review.id)}
-                  className="text-sm text-brand-600 hover:text-brand-700"
-                >
-                  Reply
-                </button>
-              )}
-              
-              {hasReplies && (
-                <button
-                  onClick={() => setShowReplies(!showReplies)}
-                  className="text-sm text-gray-500 hover:text-gray-700 flex items-center space-x-1"
-                >
-                  <span>{showReplies ? 'Hide' : 'Show'} {review.replies?.length} {review.replies?.length === 1 ? 'reply' : 'replies'}</span>
-                  {showReplies ? (
+            {hasReplies && (
+              <button
+                onClick={() => setShowReplies(!showReplies)}
+                className="text-sm text-gray-500 hover:text-gray-700 flex items-center space-x-1"
+              >
+                {showReplies ? (
+                  <>
                     <ChevronUpIcon className="w-4 h-4" />
-                  ) : (
+                    <span>Hide Replies</span>
+                  </>
+                ) : (
+                  <>
                     <ChevronDownIcon className="w-4 h-4" />
-                  )}
-                </button>
-              )}
-            </div>
-
-            {replyingTo === review.id && (
+                    <span>Show Replies</span>
+                  </>
+                )}
+              </button>
+            )}
+            
+            {/* Show replies if they exist and showReplies is true */}
+            {hasReplies && showReplies && (
               <div className="mt-4">
-                <ReviewForm
-                  onSubmit={(rating, comment) => handleSubmitReview(rating, comment, review.id)}
-                  onCancel={() => setReplyingTo(null)}
-                  isSubmitting={isSubmitting}
-                  error={error}
-                  parentId={review.id}
-                />
+                {review.replies?.map(reply => (
+                  <ReviewCard key={reply.id} review={reply} isReply={true} />
+                ))}
               </div>
             )}
-
-            {/* Show replies if expanded */}
-            {showReplies && review.replies?.map(reply => (
-              <ReviewCard key={reply.id} review={reply} isReply={true} />
-            ))}
           </div>
         </div>
       </div>

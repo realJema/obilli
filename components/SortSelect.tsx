@@ -11,10 +11,13 @@ export default function SortSelect({ totalCount }: SortSelectProps) {
   const searchParams = useSearchParams()
 
   const handleSort = (value: string) => {
-    const params = new URLSearchParams(searchParams.toString())
+    // Create new URLSearchParams with current or empty params
+    const params = new URLSearchParams(searchParams?.toString() || '')
+    
     params.set('sort', value)
     // Reset to first page when sorting changes
     params.set('page', '1')
+    
     router.push(`?${params.toString()}`)
   }
 
@@ -23,15 +26,15 @@ export default function SortSelect({ totalCount }: SortSelectProps) {
       <p className="text-gray-600">
         {totalCount} {totalCount === 1 ? 'listing' : 'listings'} found
       </p>
-      <select 
-        className="border rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        value={searchParams.get('sort') || 'newest'}
+      <select
+        value={searchParams?.get('sort') || 'newest'}
         onChange={(e) => handleSort(e.target.value)}
+        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500"
       >
         <option value="newest">Newest First</option>
         <option value="oldest">Oldest First</option>
-        <option value="price_low">Price: Low to High</option>
-        <option value="price_high">Price: High to Low</option>
+        <option value="price_asc">Price: Low to High</option>
+        <option value="price_desc">Price: High to Low</option>
       </select>
     </div>
   )

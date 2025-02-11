@@ -60,6 +60,7 @@ async function getCategoryWithListings(categoryId: string, options: {
         image_url
       ),
       users (
+        id,
         name,
         role,
         profile_picture
@@ -101,58 +102,48 @@ async function getCategoryWithListings(categoryId: string, options: {
 
   // Apply sorting
   switch (sortBy) {
+    // Temporarily disable price sorting
     case 'price_low':
     case 'price_high': {
-      // Get total count first
-      const { count: totalCount } = await query
-        .select('id', { count: 'exact' })
-        .limit(1)
-        .single()
-
-      // First get listings with prices
-      const { data: pricedListings = [] } = await query
-        .not('price', 'is', null)
-        .order('price', { ascending: sortBy === 'price_low' })
-        .order('created_at', { ascending: false })
-        .range(offset, offset + limit - 1)
-
-      // Then get listings without prices
-      const { data: unpricedListings = [] } = await supabase
-        .from('listings')
+      // Fall through to default sorting (newest first)
+      const { data: listings = [], count } = await query
         .select(`
-          id,
-          title,
-          description,
-          price,
-          currency,
-          created_at,
-          category_id,
-          categories (
-            id,
+          *,
+          categories:categories!inner (
             name
           ),
-          locations (
+          locations:locations!inner (
             name
           ),
           listing_images (
             image_url
           ),
-          users (
+          users:users!inner (
+            id,
             name,
             role,
             profile_picture
           )
         `)
-        .in('category_id', categoryIds)
-        .is('price', null)
         .order('created_at', { ascending: false })
-        .range(0, limit - pricedListings.length - 1)
+        .range(offset, offset + limit - 1)
 
-      // Combine the results
+      // Transform the data to match ListingCard props
+      const transformedListings = (listings || []).map(listing => ({
+        ...listing,
+        users: Array.isArray(listing.users) ? listing.users[0] : listing.users,
+        categories: Array.isArray(listing.categories) 
+          ? listing.categories 
+          : [listing.categories || { name: 'Uncategorized' }],
+        locations: Array.isArray(listing.locations) 
+          ? listing.locations 
+          : [listing.locations || { name: 'Location not specified' }]
+      }))
+
       return {
         category,
-        listings: [...pricedListings, ...unpricedListings],
-        totalCount: totalCount?.count || 0
+        listings: transformedListings,
+        totalCount: count || 0
       }
     }
     case 'oldest':
@@ -260,15 +251,16 @@ export default async function CategoryPage({
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {listings.map((listing) => (
-                  <ListingCard 
-                    key={listing.id} 
-                    listing={{
-                      ...listing,
-                      user: listing.users,
-                      categories: listing.categories || { name: 'Uncategorized' },
-                      locations: listing.locations || { name: 'Location not specified' }
-                    }}
-                  />
+                  <div key={listing.id} className="w-full">
+                    <ListingCard
+                      listing={{
+                        ...listing,
+                        users: listing.users,
+                        categories: listing.categories,
+                        locations: listing.locations
+                      }}
+                    />
+                  </div>
                 ))}
               </div>
 

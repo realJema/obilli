@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { StorageError } from '@supabase/storage-js'
 
 export async function uploadImage(file: File, path: string) {
   try {
@@ -36,13 +37,20 @@ export async function uploadImage(file: File, path: string) {
       })
 
     if (uploadError) {
+      const error = uploadError as StorageError
       console.error('Upload error details:', {
-        status: uploadError.status,
-        statusCode: uploadError.statusCode,
-        message: uploadError.message,
-        details: uploadError.details
+        name: error.name,
+        message: error.message
       })
-      throw new Error(`Failed to upload image: ${uploadError.message}`)
+      
+      // Simplified error handling
+      if (error.message.includes('size')) {
+        throw new Error('File too large')
+      } else if (error.message.includes('format') || error.message.includes('type')) {
+        throw new Error('Invalid file format')
+      } else {
+        throw new Error(`Upload failed: ${error.message}`)
+      }
     }
 
     if (!data?.path) {

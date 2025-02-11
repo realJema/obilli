@@ -119,14 +119,13 @@ export default function CreateListing() {
         .single()
 
       if (adError) {
-        console.error('Error creating ad:', {
-          error: adError,
+        const errorDetails = {
           message: adError.message,
-          details: adError.details,
-          hint: adError.hint,
-          code: adError.code,
-          query: adError.query
-        })
+          details: 'details' in adError ? adError.details : undefined,
+          hint: 'hint' in adError ? adError.hint : undefined,
+          code: 'code' in adError ? adError.code : undefined
+        }
+        console.error('Error creating listing:', errorDetails)
         throw new Error(`Failed to create listing: ${adError.message}`)
       }
 

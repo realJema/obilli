@@ -9,7 +9,7 @@ import { createUserRecord } from '@/lib/auth-helpers'
 interface AuthContextType {
   user: User | null
   signIn: (email: string, password: string) => Promise<void>
-  signUp: (email: string, password: string, options?: any) => Promise<any>
+  signUp: (email: string, password: string, metadata?: { name: string; role: string; phone?: string; bio?: string }) => Promise<any>
   signOut: () => Promise<void>
 }
 
@@ -58,25 +58,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (error) throw error
   }
 
-  const signUp = async (email: string, password: string, options?: any) => {
-    try {
-      const { data: { user }, error } = await supabase.auth.signUp({
-        email,
-        password,
-      }, options)
-
-      if (error) throw error
-
-      if (user) {
-        // Create record in users table
-        await createUserRecord(user)
+  const signUp = async (
+    email: string,
+    password: string,
+    metadata?: { name: string; role: string; phone?: string; bio?: string }
+  ) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: metadata
       }
+    })
 
-      return user
-    } catch (error) {
-      console.error('Error signing up:', error)
-      throw error
-    }
+    if (error) throw error
+
+    return data
   }
 
   const signOut = async () => {

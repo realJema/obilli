@@ -20,21 +20,45 @@ interface UserProfile {
   created_at: string
 }
 
+interface ListingUser {
+  id: number
+  name: string | null
+  profile_picture: string | null
+  role: string | null
+}
+
+// Base listing interface
+interface BaseListing {
+  id: number
+  title: string
+  description?: string
+  price?: number | null
+  currency?: string
+  created_at: string
+  categories: { name: string }[]
+  locations: { name: string }[]
+  listing_images?: { image_url: string }[]
+  users: ListingUser  // Change back to users to match ListingCard
+}
+
+// UserListing interface
 interface UserListing {
   id: number
   title: string
+  description: string
   price: number
   currency: string
   status: string
   created_at: string
+  categories: { name: string }[]
+  locations: { name: string }[]
   listing_images: { image_url: string }[]
-  categories: { name: string }
-  locations: { name: string }
-  users: {
-    name: string
-    profile_picture: string | null
-    role: string
-  } | null
+  users: ListingUser[]  // Keep as array for database results
+}
+
+// Keep only one version of ListingCardProps
+interface ListingCardProps {
+  listing: BaseListing
 }
 
 const ITEMS_PER_PAGE = 8
@@ -151,6 +175,7 @@ export default function ProfilePage() {
           categories (name),
           locations (name),
           users:user_id (
+            id,
             name,
             profile_picture,
             role
@@ -165,13 +190,15 @@ export default function ProfilePage() {
       // Transform the data to match the ListingCard expectations
       const transformedListings = listings?.map(listing => ({
         ...listing,
-        description: listing.description || 'No description available',
-        users: listing.users || {
-          name: user.user_metadata.name || user.email?.split('@')[0] || 'User',
-          profile_picture: user.user_metadata.profile_picture,
-          role: user.user_metadata.role || 'user'
-        }
-      })) || []
+        categories: listing.categories?.map(cat => ({ name: cat.name })) || [],
+        locations: listing.locations?.map(loc => ({ name: loc.name })) || [],
+        users: listing.users?.map(user => ({
+          id: user.id,
+          name: user.name || null,
+          profile_picture: user.profile_picture,
+          role: user.role || null
+        })) || []
+      })) as UserListing[]
 
       setListings(transformedListings)
     } catch (error) {
@@ -255,11 +282,20 @@ export default function ProfilePage() {
                   <ListingCard
                     key={listing.id}
                     listing={{
-                      ...listing,
-                      user: {
-                        name: user.email || '',
-                        role: 'user',
-                        profile_picture: profile?.profile_picture || undefined
+                      id: listing.id,
+                      title: listing.title,
+                      description: listing.description,
+                      price: listing.price,
+                      currency: listing.currency,
+                      created_at: listing.created_at,
+                      categories: listing.categories,
+                      locations: listing.locations,
+                      listing_images: listing.listing_images,
+                      users: listing.users[0] || {
+                        id: parseInt(user.id),
+                        name: user.email || null,
+                        role: null,
+                        profile_picture: profile?.profile_picture || null
                       }
                     }}
                   />

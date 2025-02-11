@@ -4,6 +4,33 @@ import ListingCard from '@/components/ListingCard';
 import CategorySection from '@/components/CategorySection';
 import HeroSection from '@/components/HeroSection'
 
+// Add interface for the listing type
+interface Listing {
+  id: number
+  title: string
+  description?: string
+  price?: number | null
+  currency?: string
+  created_at: string
+  categories: { name: string }[]
+  locations: { name: string }[]
+  listing_images?: { image_url: string }[]
+  users: {
+    id: number
+    name: string | null
+    profile_picture: string | null
+    role: string | null
+  }
+}
+
+// Add interface for category with listings
+interface CategoryWithListings {
+  id: number
+  name: string
+  description?: string
+  listings: Listing[]
+}
+
 function transformUnsplashUrl(url: string) {
   // Check if it's an Unsplash web URL
   if (url.includes('unsplash.com/photos/')) {
@@ -28,23 +55,14 @@ async function getLatestAds(page = 1) {
   const { data: listings, error, count } = await supabase
     .from('listings')
     .select(`
-      id,
-      title,
-      description,
-      price,
-      currency,
-      status,
-      created_at,
-      categories (name),
-      locations (name),
-      listing_images (image_url),
-      users:user_id (
+      *,
+      users:users!inner (
         id,
         name,
         profile_picture,
         role
       )
-    `, { count: 'exact' })
+    `)
     .order('created_at', { ascending: false })
     .range(from, to)
 
@@ -56,13 +74,13 @@ async function getLatestAds(page = 1) {
   const totalPages = Math.ceil((count || 0) / ITEMS_PER_PAGE)
 
   // Transform the listings data
-  const transformedListings = listings?.map(listing => ({
+  const transformedListings = listings?.map((listing: any) => ({
     ...listing,
-    users: {
-      id: listing.users?.id,
-      name: listing.users?.name || 'Anonymous',
-      profile_picture: listing.users?.profile_picture,
-      role: listing.users?.role || 'Member'
+    users: listing.users || {
+      id: 0,
+      name: 'Anonymous',
+      profile_picture: null,
+      role: 'Member'
     }
   })) || []
 
@@ -99,17 +117,8 @@ async function getMainCategoriesWithListings() {
       const { data: listings, error: listingsError } = await supabase
         .from('listings')
         .select(`
-          id,
-          title,
-          description,
-          price,
-          currency,
-          status,
-          created_at,
-          categories (name),
-          locations (name),
-          listing_images (image_url),
-          users:user_id (
+          *,
+          users:users!inner (
             id,
             name,
             profile_picture,
@@ -126,13 +135,13 @@ async function getMainCategoriesWithListings() {
       }
 
       // Transform the listings data
-      const transformedListings = listings?.map(listing => ({
+      const transformedListings = listings?.map((listing: any) => ({
         ...listing,
-        users: {
-          id: listing.users?.id,
-          name: listing.users?.name || 'Anonymous',
-          profile_picture: listing.users?.profile_picture,
-          role: listing.users?.role || 'Member'
+        users: listing.users || {
+          id: 0,
+          name: 'Anonymous',
+          profile_picture: null,
+          role: 'Member'
         }
       })) || []
 
@@ -173,16 +182,16 @@ export default async function Home() {
     <>
       <HeroSection />
       <div className="space-y-12">
-        {categoriesWithListings.map((category) => (
+        {categoriesWithListings.map((category: CategoryWithListings) => (
           <CategorySection 
             key={category.id}
             category={category.name}
             description={category.description}
           >
-            {category.listings.map((listing) => (
+            {category.listings.map((listing: Listing) => (
               <ListingCard 
                 key={listing.id}
-                listing={listing}  // No need for mapListingData since data is already transformed
+                listing={listing}
               />
             ))}
           </CategorySection>

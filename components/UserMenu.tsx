@@ -12,7 +12,9 @@ export default function UserMenu() {
   const { user, signOut } = useAuth()
   const [showDropdown, setShowDropdown] = useState(false)
   const [showAuthModal, setShowAuthModal] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
+  
+  // Make the ref type more specific
+  const dropdownRef = useRef<HTMLDivElement>(null) as React.MutableRefObject<HTMLDivElement>
 
   useOnClickOutside(dropdownRef, () => setShowDropdown(false))
 
