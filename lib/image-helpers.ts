@@ -1,60 +1,38 @@
-import imageCompression from 'browser-image-compression';
+import { supabase } from './supabase'
+import imageCompression from 'browser-image-compression'
 
-export async function processImage(file: File): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.readAsDataURL(file)
-    reader.onload = (event) => {
-      const img = new Image()
-      img.src = event.target?.result as string
-      
-      img.onload = () => {
-        const canvas = document.createElement('canvas')
-        const ctx = canvas.getContext('2d')
-        if (!ctx) {
-          reject(new Error('Failed to get canvas context'))
-          return
-        }
-
-        // Calculate new dimensions (max width/height of 1200px)
-        let width = img.width
-        let height = img.height
-        const maxSize = 1200
-
-        if (width > height && width > maxSize) {
-          height = (height * maxSize) / width
-          width = maxSize
-        } else if (height > maxSize) {
-          width = (width * maxSize) / height
-          height = maxSize
-        }
-
-        canvas.width = width
-        canvas.height = height
-
-        // Draw and compress image
-        ctx.drawImage(img, 0, 0, width, height)
-
-        // Convert to blob with reduced quality
-        canvas.toBlob(
-          (blob) => {
-            if (blob) {
-              resolve(blob)
-            } else {
-              reject(new Error('Failed to compress image'))
-            }
-          },
-          'image/jpeg',
-          0.7  // Compression quality (0.7 = 70% quality)
-        )
-      }
-
-      img.onerror = () => {
-        reject(new Error('Failed to load image'))
-      }
+export async function processImage(file: File, path: string): Promise<string> {
+  try {
+    // First compress the image
+    const options = {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1920,
+      useWebWorker: true,
+      initialQuality: 0.8,
     }
-    reader.onerror = () => {
-      reject(new Error('Failed to read file'))
+
+    const compressedFile = await imageCompression(file, options)
+
+    // Upload to Supabase storage
+    const { data, error } = await supabase.storage
+      .from('listing_images')
+      .upload(`${path}/${Date.now()}-${file.name}`, compressedFile, {
+        cacheControl: '3600',
+        upsert: false
+      })
+
+    if (error) {
+      throw error
     }
-  })
+
+    // Get the public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('listing_images')
+      .getPublicUrl(data.path)
+
+    return publicUrl
+  } catch (error) {
+    console.error('Error processing/uploading image:', error)
+    throw error
+  }
 } 

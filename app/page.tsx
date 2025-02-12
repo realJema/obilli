@@ -190,7 +190,7 @@ export default async function Home() {
           >
             {category.listings.map((listing: Listing) => (
               <ListingCard 
-                key={listing.id}
+              key={listing.id} 
                 listing={listing}
               />
             ))}

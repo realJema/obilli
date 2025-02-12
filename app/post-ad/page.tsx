@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, memo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
@@ -27,6 +27,8 @@ import clsx from 'clsx'
 import Link from 'next/link'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import { useData } from '@/contexts/DataContext'
+import { useDebouncedCallback } from 'use-debounce'
+import imageCompression from 'browser-image-compression'
 
 interface CategoryWithChildren {
   id: number
@@ -134,9 +136,9 @@ interface LocationSelectorProps {
 }
 
 interface ListingDetailsFormProps {
-  formState: FormState
-  setFormState: (state: FormState | ((prev: FormState) => FormState)) => void
-  showErrors?: boolean
+  initialFormState: FormState
+  onNext: (formData: FormState) => void
+  showErrors: boolean
 }
 
 const STEPS = [
@@ -214,7 +216,7 @@ const LeftPanel = ({ currentStep, steps }: LeftPanelProps) => {
   const StepIcon = step.icon
 
   return (
-    <div className="hidden lg:block w-80 bg-gray-50 dark:bg-gray-800 p-8">
+    <div className="hidden lg:block w-1/3 bg-gray-50 dark:bg-gray-800 p-8">
       <div className="sticky top-8">
         <h2 className="text-2xl font-bold mb-6">
           {step.title}
@@ -552,7 +554,7 @@ const ContactOptionsSection = ({ formState, setFormState, user }: ContactOptions
                 ? "bg-green-50 border-green-200 text-green-700" 
                 : "bg-white hover:border-gray-300"
             )}>
-              <input
+          <input
                 type="checkbox"
                 checked={formState.contact_whatsapp}
                 onChange={(e) => setFormState(prev => ({
@@ -589,7 +591,7 @@ const ContactOptionsSection = ({ formState, setFormState, user }: ContactOptions
             </label>
           </div>
         </div>
-      </div>
+        </div>
 
       {!formState.contact_whatsapp && !formState.contact_call && (
         <motion.p 
@@ -618,32 +620,91 @@ const validateContactOptions = (formState: FormState): boolean => {
   return true
 }
 
-const validateStep = (step: number, formState: FormState, images: File[]): boolean => {
+const validateStep = (
+  step: number,
+  formState: FormState,
+  setFormState: (state: FormState | ((prev: FormState) => FormState)) => void,
+  images: File[]
+): boolean => {
+  setFormState(prev => ({ ...prev, validationAttempted: true }))
+
   switch (step) {
-    case 1: // Basic Details
-      if (!formState.title || !formState.description || !formState.price) {
-        toast.error('Please fill in all required fields')
+    case 1:
+      if (!formState.title.trim()) {
+        toast.error('Please enter a title')
+        return false
+      }
+      if (!formState.description.trim()) {
+        toast.error('Please enter a description')
         return false
       }
       return true
 
-    case 2: // Category
+    case 2:
+      if (!formState.price || isNaN(Number(formState.price))) {
+        toast.error('Please enter a valid price')
+        return false
+      }
+      return true
+
+    case 3:
+      // Category validation
       if (!formState.category_id) {
         toast.error('Please select a category')
         return false
       }
-      return true
+      
+      // Safely check for subcategories
+      const selectedCategory = formState.selectedCategory
+      const categoryChildren = selectedCategory?.children || []
+      
+      if (categoryChildren.length > 0) {
+        const hasSelectedSubcategory = categoryChildren.some(
+          sub => sub.id.toString() === formState.category_id
+        )
+        
+        if (!hasSelectedSubcategory) {
+          toast.error('Please select a subcategory')
+          return false
+        }
+      }
 
-    case 3: // Location & Contact
+      // Location validation
       if (!formState.location_id) {
         toast.error('Please select a location')
         return false
       }
-      return validateContactOptions(formState)
 
-    case 4: // Images
+      const selectedLocation = formState.selectedLocation
+      const locationChildren = selectedLocation?.children || []
+
+      if (locationChildren.length > 0) {
+        const hasSelectedSubLocation = locationChildren.some(
+          sub => sub.id.toString() === formState.location_id
+        )
+        
+        if (!hasSelectedSubLocation) {
+          toast.error('Please select a specific location')
+          return false
+        }
+      }
+
+      return true
+
+    case 4:
+      if (!formState.contact_number && !formState.use_profile_number) {
+        toast.error('Please enter a contact number or use your profile number')
+        return false
+      }
+      return true
+
+    case 5:
       if (images.length === 0) {
         toast.error('Please upload at least one image')
+        return false
+      }
+      if (images.length > 10) {
+        toast.error('Maximum 10 images allowed')
         return false
       }
       return true
@@ -660,44 +721,335 @@ const Logo = () => (
   </span>
 )
 
+// Create a new controlled form component
+const ControlledInput = memo(({ 
+  value, 
+  onChange, 
+  label, 
+  error,
+  showErrors,
+  ...props 
+}: {
+  value: string
+  onChange: (value: string) => void
+  label: string
+  error?: string
+  showErrors?: boolean
+  [key: string]: any
+}) => {
+  const [localValue, setLocalValue] = useState(value)
+  
+  const debouncedOnChange = useDebouncedCallback(
+    (value: string) => {
+      onChange(value)
+    },
+    300
+  )
+
+  useEffect(() => {
+    setLocalValue(value)
+  }, [value])
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const newValue = e.target.value
+    setLocalValue(newValue)
+    debouncedOnChange(newValue)
+  }
+
+  return (
+        <div>
+      <label className="block text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        {label} <span className="text-red-500">*</span>
+          </label>
+      {props.type === 'textarea' ? (
+          <textarea
+          value={localValue}
+          onChange={handleChange}
+          className={`mt-1 block w-full rounded-lg border ${
+            showErrors && error ? 'border-red-500' : 'border-gray-300'
+          } shadow-sm focus:border-brand-500 text-lg p-4`}
+          {...props}
+        />
+      ) : (
+        <input
+          value={localValue}
+          onChange={handleChange}
+          className={`mt-1 block w-full rounded-lg border ${
+            showErrors && error ? 'border-red-500' : 'border-gray-300'
+          } shadow-sm focus:border-brand-500 text-lg p-4`}
+          {...props}
+        />
+      )}
+      {showErrors && error && (
+        <p className="mt-2 text-sm text-red-600">{error}</p>
+      )}
+        </div>
+  )
+})
+
+ControlledInput.displayName = 'ControlledInput'
+
 // Update the ListingDetailsForm component
-const ListingDetailsForm = ({ 
-  formState, 
-  setFormState, 
+const ListingDetailsForm = memo(({ 
+  initialFormState,
+  onNext,
   showErrors = false 
-}: ListingDetailsFormProps) => {
-  const handlePriceChange = (value: string) => {
-    // Remove non-numeric characters
-    const numericValue = value.replace(/[^0-9]/g, '')
-    
-    // Format with commas for display
+}: {
+  initialFormState: FormState
+  onNext: (formData: FormState) => void
+  showErrors: boolean
+}) => {
+  const [localForm, setLocalForm] = useState({
+    title: initialFormState.title,
+    description: initialFormState.description,
+    price: initialFormState.price,
+    displayPrice: initialFormState.displayPrice,
+    currency: initialFormState.currency
+  })
+  const [showLocalErrors, setShowLocalErrors] = useState(false)
+
+  // Add these functions back
+  const handleChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setLocalForm(prev => ({
+      ...prev,
+      [field]: e.target.value
+    }))
+  }
+
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const numericValue = e.target.value.replace(/[^0-9]/g, '')
     const displayPrice = numericValue ? parseInt(numericValue).toLocaleString() : ''
     
-    setFormState(prev => ({
+    setLocalForm(prev => ({
       ...prev,
       price: numericValue,
       displayPrice
     }))
   }
 
+  // Get validation errors without showing toasts
+  const getValidationErrors = (form: typeof localForm) => {
+    const errors = {
+      title: '',
+      description: '',
+      price: ''
+    }
+    
+    if (!form.title.trim()) {
+      errors.title = 'Please enter a title'
+    } else if (form.title.length < 10) {
+      errors.title = 'Title must be at least 10 characters'
+    }
+
+    if (!form.description.trim()) {
+      errors.description = 'Please enter a description'
+    } else if (form.description.length < 30) {
+      errors.description = 'Description must be at least 30 characters'
+    }
+
+    if (!form.price) {
+      errors.price = 'Please enter a price'
+    } else if (parseInt(form.price) <= 0) {
+      errors.price = 'Price must be greater than 0'
+    }
+
+    return errors
+  }
+
+  const handleNext = () => {
+    setShowLocalErrors(true)
+    const errors = getValidationErrors(localForm)
+    
+    // Check if there are any errors
+    if (Object.values(errors).some(error => error)) {
+      // Show all errors as toasts
+      Object.values(errors).forEach(error => {
+        if (error) toast.error(error)
+      })
+      return
+    }
+
+    onNext({
+      ...initialFormState,
+      ...localForm
+    })
+  }
+
+  const errors = getValidationErrors(localForm)
+  const shouldShowErrors = showErrors || showLocalErrors
+
   return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="space-y-6"
-    >
-      <h3 className="text-xl font-semibold flex items-center gap-2 text-gray-800">
-        <PencilSquareIcon className="w-6 h-6 text-brand-600" />
-        Basic Information
-      </h3>
+    <div className="space-y-8">
+        <div>
+        <label className="block text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          Title <span className="text-red-500">*</span>
+          </label>
+          <input
+          value={localForm.title}
+          onChange={handleChange('title')}
+          className={`mt-1 block w-full rounded-lg border ${
+            shouldShowErrors && errors.title ? 'border-red-500' : 'border-gray-300'
+          } shadow-sm focus:border-brand-500 text-lg p-4`}
+          placeholder="e.g., iPhone 13 Pro Max - Perfect Condition"
+        />
+        {shouldShowErrors && errors.title && (
+          <p className="mt-2 text-sm text-red-600">{errors.title}</p>
+        )}
+        </div>
 
-      <div className="space-y-6">
-        {/* ... rest of the form */}
+        <div>
+        <label className="block text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          Description <span className="text-red-500">*</span>
+          </label>
+        <textarea
+          rows={6}
+          value={localForm.description}
+          onChange={handleChange('description')}
+          className={`mt-1 block w-full rounded-lg border ${
+            shouldShowErrors && errors.description ? 'border-red-500' : 'border-gray-300'
+          } shadow-sm focus:border-brand-500 text-lg p-4`}
+          placeholder="Describe your item in detail..."
+        />
+        {shouldShowErrors && errors.description && (
+          <p className="mt-2 text-sm text-red-600">{errors.description}</p>
+        )}
       </div>
-    </motion.div>
-  )
-}
 
+      <div>
+        <label className="block text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          Price <span className="text-red-500">*</span>
+        </label>
+        <div className="mt-1 relative rounded-lg shadow-sm">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <span className="text-gray-500 text-lg font-medium">
+              {localForm.currency}
+            </span>
+          </div>
+          <input
+            value={localForm.displayPrice}
+            onChange={handlePriceChange}
+            className={`block w-full rounded-lg border ${
+              shouldShowErrors && errors.price ? 'border-red-500' : 'border-gray-300'
+            } pl-20 text-lg p-4`}
+            placeholder="0"
+          />
+        </div>
+        {shouldShowErrors && errors.price && (
+          <p className="mt-2 text-sm text-red-600">{errors.price}</p>
+        )}
+      </div>
+
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={handleNext}
+          className="px-8 py-4 bg-brand-600 text-white rounded-lg hover:bg-brand-700 text-lg font-medium"
+        >
+          Next Step
+        </button>
+      </div>
+    </div>
+  )
+})
+
+ListingDetailsForm.displayName = 'ListingDetailsForm'
+
+// Update MainContent props to include handleSubmit
+const MainContent = ({ 
+  step, 
+  setStep, 
+  renderStepContent,
+  handleSubmit 
+}: { 
+  step: number
+  setStep: (step: number) => void
+  renderStepContent: () => React.ReactNode
+  handleSubmit: (e: React.FormEvent) => Promise<void>
+}) => (
+  <div className="min-h-screen bg-gray-50 -mt-4">
+    <div className="sticky top-0 z-10 bg-white">
+      <div className="container mx-auto px-4 flex items-center space-x-12">
+        <Link href="/" className="flex-shrink-0">
+          <Logo />
+        </Link>
+
+        <div className="flex-grow">
+          <StepIndicator currentStep={step} steps={STEPS} />
+        </div>
+
+        <Link
+          href="/"
+          className="flex-shrink-0 p-2.5 hover:bg-gray-100 rounded-full transition-colors"
+        >
+          <XMarkIcon className="w-7 h-7 text-gray-600" />
+        </Link>
+      </div>
+    </div>
+
+    {step === 5 ? (
+      // Review & Publish step - centered content without left panel
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-sm p-8">
+            <form onSubmit={handleSubmit} className="space-y-8">
+              <h2 className="text-2xl font-semibold mb-6">
+                Review & Publish
+              </h2>
+              {renderStepContent()}
+            </form>
+          </div>
+        </div>
+      </div>
+    ) : (
+      // Other steps - with left panel
+      <div className="flex">
+        <LeftPanel currentStep={step} steps={STEPS} />
+        <div className="w-2/3 p-12">
+          <div className="mx-auto">
+            <div className="bg-white rounded-2xl shadow-sm p-8">
+              <form
+                onSubmit={(e) => e.preventDefault()}
+                className="min-h-[400px] flex flex-col"
+              >
+                <div className="flex-1">{renderStepContent()}</div>
+
+                <div className="sticky bottom-0 left-0 right-0 flex justify-between mt-8 pt-4 border-t border-gray-200 bg-white">
+                  {step > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => setStep(step - 1)}
+                      className="flex items-center px-6 py-3 text-gray-700 hover:text-brand-600 transition-colors"
+                    >
+                      <ArrowLeftIcon className="w-5 h-5 mr-2" />
+                      Back
+                    </button>
+                  )}
+
+                  {step > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => setStep(step + 1)}
+                      className={clsx(
+                        "flex items-center px-6 py-3 rounded-lg font-medium transition-all",
+                        "bg-brand-600 text-white hover:bg-brand-700",
+                        "disabled:opacity-50 disabled:cursor-not-allowed"
+                      )}
+                    >
+                      Next
+                      <ArrowRightIcon className="w-5 h-5 ml-2" />
+                    </button>
+                  )}
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
+)
+
+// Update the PostAdPage component to pass props to MainContent
 export default function PostAdPage() {
   const router = useRouter()
   const { user } = useAuth()
@@ -766,18 +1118,33 @@ export default function PostAdPage() {
     }))
   }
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
     console.log('Starting submission process...')
+
+    if (!user) {
+      toast.error('Please sign in to post a listing')
+      return
+    }
+
+    // Add validation for required fields
+    if (!formState.title || !formState.description || !formState.price || !formState.category_id || !formState.location_id) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+
+    // Check if images are selected
+    if (images.length === 0) {
+      toast.error('Please upload at least one image')
+      return
+    }
+
     try {
-      if (!user) {
-        console.error('No user found')
-        toast.error('Please sign in to post a listing')
-        return
-      }
-
       setLoading(true)
+      setUploadProgress(0)
+      toast.loading('Creating your listing...', { id: 'publish' })
 
-      // First get the user's ID from our users table
+      // Get user's ID from users table
       const { data: userData, error: userError } = await supabase
         .from('users')
         .select('id')
@@ -785,121 +1152,104 @@ export default function PostAdPage() {
         .single()
 
       if (userError) {
-        console.error('Error getting user data:', userError)
-        toast.error('Error getting user data')
-        setLoading(false)
+        toast.error('Error getting user data', { id: 'publish' })
         return
       }
 
-      if (!userData) {
-        console.error('No user found in users table')
-        toast.error('User profile not found')
-        setLoading(false)
-        return
-      }
-
-      // Then create the listing with the correct user_id
+      // Create the listing
       const { data: listing, error: listingError } = await supabase
         .from('listings')
-        .insert([{
+        .insert({
           title: formState.title,
           description: formState.description,
-          price: formState.price,
-          category_id: formState.category_id,
-          location_id: formState.location_id,
-          user_id: userData.id, // Use the integer ID from users table
-          contact_number: formState.use_profile_number ? 
-            user.user_metadata.phone : 
-            formState.contact_number,
+          price: parseInt(formState.price),
+          currency: formState.currency,
+          category_id: parseInt(formState.category_id),
+          location_id: parseInt(formState.location_id),
+          user_id: userData.id,
+          status: 'pending',
+          contact_number: formState.use_profile_number ? user.user_metadata.phone : formState.contact_number,
           contact_whatsapp: formState.contact_whatsapp,
-          contact_call: formState.contact_call,
-          use_profile_number: formState.use_profile_number,
-          status: 'active'
-        }])
+          contact_call: formState.contact_call
+        })
         .select()
         .single()
 
       if (listingError) {
-        throw listingError
+        toast.error('Error creating listing', { id: 'publish' })
+        return
       }
 
-      // Process all images in parallel
-      const imagePromises = images.map(async (image, index) => {
+      // Update toast for image upload
+      toast.loading('Uploading images...', { id: 'publish' })
+      let uploadedCount = 0
+
+      // Upload images sequentially
+      for (const [index, image] of images.entries()) {
         try {
-          // Process image
-          const processedImage = await processImage(image)
+          // Update progress
+          setUploadProgress(Math.round((index / images.length) * 50))
           
-          // Upload to storage
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('listing_images')
-            .upload(
-              `${user.id}/${listing.id}/${Date.now()}-${index}`, 
-              processedImage, 
-              { cacheControl: '3600', contentType: 'image/jpeg' }
-            )
-
-          if (uploadError) throw uploadError
-
-          // Get public URL
-          const { data: { publicUrl } } = supabase.storage
-            .from('listing_images')
-            .getPublicUrl(uploadData.path)
+          // Process and upload image in one step
+          const imageUrl = await processImage(image, `listings/${listing.id}`)
 
           // Create image record
-          const { error: imageRecordError } = await supabase
+          const { error: imageError } = await supabase
             .from('listing_images')
-            .insert([{
+            .insert({
               listing_id: listing.id,
-              image_url: publicUrl,
-              caption: `Image ${index + 1}`
-            }])
+              image_url: imageUrl
+            })
 
-          if (imageRecordError) throw imageRecordError
+          if (imageError) throw imageError
 
-          return true
+          uploadedCount++
+          setUploadProgress(50 + Math.round((uploadedCount / images.length) * 50))
         } catch (error) {
-          console.error(`Error processing image ${index}:`, error)
-          return false
+          console.error(`Error with image ${index + 1}:`, error)
         }
-      })
-
-      // Wait for all images to be processed and uploaded
-      const results = await Promise.all(imagePromises)
-      
-      // Check if any images failed
-      if (results.some(result => !result)) {
-        toast.error('Some images failed to upload')
-      } else {
-        toast.success('Listing created successfully!')
-        router.push('/')
       }
 
+      if (uploadedCount === 0) {
+        toast.error('Failed to upload images', { id: 'publish' })
+        return
+      }
+
+      // Success!
+      toast.success('Listing published successfully!', { id: 'publish' })
+      router.push(`/post-ad/success?id=${listing.id}`)
+
     } catch (error) {
-      console.error('Error creating listing:', error)
-      toast.error('Failed to create listing')
+      console.error('Submission error:', error)
+      toast.error('Failed to create listing', { id: 'publish' })
     } finally {
       setLoading(false)
+      setUploadProgress(0)
     }
   }
 
-  const handleNextStep = () => {
-    // Set validation attempted flag
-    setFormState(prev => ({ ...prev, validationAttempted: true }))
-    
-    if (validateStep(step, formState, images)) {
-      setFormState(prev => ({ ...prev, validationAttempted: false }))
-      setStep(step + 1)
-    }
+  const handleStepComplete = (stepData: Partial<FormState>) => {
+    setFormState(prev => ({
+      ...prev,
+      ...stepData
+    }))
+    setStep(step + 1)
   }
 
   const renderStepContent = () => {
+    console.log('Rendering step content for step:', step)
+    
     switch (step) {
       case 1:
+        console.log('Rendering ListingDetailsForm with:', {
+          formState,
+          validationAttempted: formState.validationAttempted
+        })
         return (
           <ListingDetailsForm 
-            formState={formState} 
-            setFormState={setFormState} 
-            showErrors={!!formState.validationAttempted}  // New prop
+            initialFormState={formState}
+            onNext={handleStepComplete}
+            showErrors={!!formState.validationAttempted}
           />
         )
 
@@ -909,7 +1259,7 @@ export default function PostAdPage() {
             <h2 className="text-2xl font-semibold mb-6">Select Category</h2>
             <div className="space-y-8">
               {/* Main Categories */}
-              <div>
+        <div>
                 <label className="block text-sm font-medium mb-4">Main Category</label>
                 <div className="flex flex-wrap gap-3">
                   {categoriesTree.map(category => (
@@ -930,11 +1280,11 @@ export default function PostAdPage() {
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       )}
                     >
-                      {category.name}
+                {category.name}
                     </button>
-                  ))}
+            ))}
                 </div>
-              </div>
+        </div>
 
               {/* Subcategories */}
               {formState.selectedCategory && formState.selectedCategory.children && formState.selectedCategory.children.length > 0 && (
@@ -978,7 +1328,7 @@ export default function PostAdPage() {
             
             {/* Location Selection */}
             <div className="space-y-8">
-              <div>
+        <div>
                 <label className="block text-sm font-medium mb-4">Select Location</label>
                 <div className="flex flex-wrap gap-3">
                   {locationsTree.map(location => (
@@ -999,11 +1349,11 @@ export default function PostAdPage() {
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       )}
                     >
-                      {location.name}
+                {location.name}
                     </button>
-                  ))}
+            ))}
                 </div>
-              </div>
+        </div>
 
               {/* Sub-locations */}
               {formState.selectedLocation && formState.selectedLocation.children && formState.selectedLocation.children.length > 0 && (
@@ -1094,10 +1444,10 @@ export default function PostAdPage() {
                       />
                     </motion.div>
                   )}
-                </div>
+        </div>
 
                 {/* Contact Preferences - More Compact */}
-                <div>
+        <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     How can buyers contact you?
                   </label>
@@ -1174,184 +1524,47 @@ export default function PostAdPage() {
 
       case 5:
         return (
-          <div className="container mx-auto px-4 py-12">
-            <div className="max-w-3xl mx-auto">
-              <div className="bg-white rounded-2xl shadow-sm p-8">
-                <form 
-                  onSubmit={async (e) => {
-                    console.log('Form submitted')
-                    e.preventDefault()
-                    await handleSubmit()
-                  }}
-                  className="space-y-8"
-                >
-                  <h2 className="text-2xl font-semibold mb-6">
-                    Review & Publish
-                  </h2>
-                  <ListingPreview formData={formState} images={images} />
-
-                  <div className="flex justify-center pt-8 border-t">
-                    <button
-                      type="button"
-                      onClick={() => setStep(step - 1)}
-                      className="flex items-center px-6 py-3 text-lg font-medium text-gray-700 hover:text-brand-600 transition-colors mr-4"
-                    >
-                      <ArrowLeftIcon className="w-5 h-5 mr-2" />
-                      Back
-                    </button>
-
+          <>
+            <ListingPreview formData={formState} images={images} />
+            
+            <div className="flex justify-end space-x-4 pt-8 border-t">
+              <button
+                type="button"
+                onClick={() => setStep(step - 1)}
+                className="px-6 py-3 text-gray-700 hover:text-brand-600 transition-colors"
+                disabled={loading}
+              >
+                Back to Photos
+              </button>
+              
           <button
             type="submit"
-                      disabled={loading}
-                      className={clsx(
-                        "flex items-center px-8 py-3 text-lg font-medium",
-                        "bg-brand-600 text-white rounded-xl",
-                        "hover:bg-brand-700 transition-colors",
-                        "disabled:opacity-50 disabled:cursor-not-allowed"
-                      )}
-                    >
-                      {loading ? (
-                        <div className="flex items-center">
-                          <span className="mr-2">Publishing...</span>
-                          {uploadProgress > 0 && (
-                            <span className="text-sm">({uploadProgress}%)</span>
-                          )}
-                        </div>
-                      ) : (
-                        "Publish Listing"
-                      )}
+                disabled={loading}
+                className={clsx(
+                  "flex items-center px-8 py-3 text-lg font-medium",
+                  "bg-brand-600 text-white rounded-xl",
+                  "hover:bg-brand-700 transition-colors",
+                  "disabled:opacity-50 disabled:cursor-not-allowed"
+                )}
+              >
+                {loading ? (
+                  <div className="flex items-center">
+                    <span className="mr-2">Publishing...</span>
+                    {uploadProgress > 0 && (
+                      <span className="text-sm">({uploadProgress}%)</span>
+                    )}
+                  </div>
+                ) : (
+                  "Publish Listing"
+                )}
           </button>
         </div>
-      </form>
-              </div>
-            </div>
-          </div>
+          </>
         )
 
       default:
         return null
     }
-  }
-
-  const MainContent = () => {
-    return (
-      <div className="min-h-screen bg-gray-50 -mt-4">
-        <div className="sticky top-0 z-10 bg-white">
-          <div className="container mx-auto px-4 flex items-center space-x-12">
-            <Link href="/" className="flex-shrink-0">
-              <Logo />
-            </Link>
-
-            <div className="flex-grow">
-              <StepIndicator currentStep={step} steps={STEPS} />
-            </div>
-
-            <Link
-              href="/"
-              className="flex-shrink-0 p-2.5 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <XMarkIcon className="w-7 h-7 text-gray-600" />
-            </Link>
-          </div>
-        </div>
-
-        {step === STEPS.length ? (
-          <div className="container mx-auto px-4 py-12 ">
-            <div className="max-w-3xl mx-auto">
-              <div className="bg-white rounded-2xl shadow-sm p-8">
-                <form onSubmit={(e) => {
-                  e.preventDefault()
-                  handleSubmit()
-                }}>
-                  <div className="space-y-8">
-                    <h2 className="text-2xl font-semibold mb-6">
-                      Review & Publish
-                    </h2>
-                    <ListingPreview formData={formState} images={images} />
-
-                    <div className="flex justify-center pt-8 border-t">
-                      <button
-                        type="button"
-                        onClick={() => setStep(step - 1)}
-                        className="flex items-center px-6 py-3 text-lg font-medium text-gray-700 hover:text-brand-600 transition-colors mr-4"
-                      >
-                        <ArrowLeftIcon className="w-5 h-5 mr-2" />
-                        Back
-                      </button>
-
-                      <button
-                        type="submit"
-                        disabled={loading}
-                        className={clsx(
-                          "flex items-center px-8 py-3 text-lg font-medium",
-                          "bg-brand-600 text-white rounded-xl",
-                          "hover:bg-brand-700 transition-colors",
-                          "disabled:opacity-50 disabled:cursor-not-allowed"
-                        )}
-                      >
-                        {loading ? (
-                          <div className="flex items-center">
-                            <span className="mr-2">Publishing...</span>
-                            {uploadProgress > 0 && (
-                              <span className="text-sm">({uploadProgress}%)</span>
-                            )}
-                          </div>
-                        ) : (
-                          "Publish Listing"
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="flex">
-            <LeftPanel currentStep={step} steps={STEPS} />
-
-            <div className="w-2/3 p-12">
-              <div className="max-w-2xl mx-auto">
-                <div className="bg-white rounded-2xl shadow-sm p-8">
-                  <form
-                    onSubmit={(e) => e.preventDefault()}
-                    className="min-h-[400px] flex flex-col"
-                  >
-                    <div className="flex-1">{renderStepContent()}</div>
-
-                    <div className="sticky bottom-0 left-0 right-0 flex justify-between mt-8 pt-4 border-t border-gray-200 bg-white">
-                      {step > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => setStep(step - 1)}
-                          className="flex items-center px-6 py-3 text-lg font-medium text-gray-700 hover:text-brand-600 transition-colors"
-                        >
-                          <ArrowLeftIcon className="w-5 h-5 mr-2" />
-                          Back
-                        </button>
-                      )}
-
-                      <button
-                        type="button"
-                        onClick={handleNextStep}
-                        className={clsx(
-                          "flex items-center px-6 py-3 rounded-lg font-medium transition-all",
-                          "bg-brand-600 text-white hover:bg-brand-700",
-                          "disabled:opacity-50 disabled:cursor-not-allowed"
-                        )}
-                      >
-                        Next
-                        <ArrowRightIcon className="w-5 h-5 ml-2" />
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-    </div>
-  );
   }
 
   if (!user) {
@@ -1369,9 +1582,38 @@ export default function PostAdPage() {
         >
           Sign In
         </button>
-      </div>
+    </div>
     )
   }
 
-  return <MainContent />
+  return (
+    <MainContent 
+      step={step}
+      setStep={setStep}
+      renderStepContent={renderStepContent}
+      handleSubmit={handleSubmit}
+    />
+  )
+}
+
+// Add this utility function at the top level
+const optimizeImage = async (file: File) => {
+  console.log('Starting image optimization...')
+  console.log('Original image size:', (file.size / 1024 / 1024).toFixed(2), 'MB')
+
+  const options = {
+    maxSizeMB: 1, // Max file size in MB
+    maxWidthOrHeight: 1920, // Max width/height
+    useWebWorker: true, // Use web worker for better performance
+    initialQuality: 0.8, // Initial quality of compression
+  }
+
+  try {
+    const compressedFile = await imageCompression(file, options)
+    console.log('Compressed image size:', (compressedFile.size / 1024 / 1024).toFixed(2), 'MB')
+    return compressedFile
+  } catch (error) {
+    console.error('Error optimizing image:', error)
+    return file // Return original file if optimization fails
+  }
 }

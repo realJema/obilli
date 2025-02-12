@@ -130,7 +130,7 @@ export default async function ListingDetails({
     getListing(params.id),
     getListingReviews(params.id)
   ])
-  
+
   if (!listing) {
     notFound()
   }
@@ -154,7 +154,7 @@ export default async function ListingDetails({
         <a href={`/categories/${listing.category_id}`} className="hover:text-blue-500">
           {listing.categories.name}
         </a>
-      </div>
+        </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Content */}
@@ -169,7 +169,7 @@ export default async function ListingDetails({
                   size={48}
                 />
               </div>
-              <div>
+        <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                   {listing.users?.name || 'User'}
                 </h3>
@@ -227,9 +227,9 @@ export default async function ListingDetails({
                     />
                   </div>
                 ))}
-              </div>
+        </div>
             )}
-          </div>
+        </div>
 
           {/* Listing Details */}
           <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
@@ -320,9 +320,9 @@ export default async function ListingDetails({
                 Save Listing
               </button>
             </div>
+            </div>
           </div>
         </div>
-      </div>
 
       {/* Related Listings */}
       {relatedListings.length > 0 && (

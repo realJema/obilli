@@ -14,14 +14,6 @@ interface AuthModalProps {
 // Add a type for possible roles
 type UserRole = 'buyer' | 'seller'
 
-// Update the form data state type
-const [formData, setFormData] = useState({
-  email: '',
-  password: '',
-  name: '',
-  role: 'buyer' as UserRole  // Use the union type
-})
-
 // Update the interface if you have one
 interface AuthFormData {
   email: string
@@ -32,6 +24,12 @@ interface AuthFormData {
 
 export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: AuthModalProps) {
   const [mode, setMode] = useState<'signin' | 'signup'>(initialMode)
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    name: '',
+    role: 'buyer' as UserRole  // Use the union type
+  })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const { signIn, signUp } = useAuth()

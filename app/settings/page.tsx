@@ -49,88 +49,52 @@ export default function SettingsPage() {
     setMessage({ type: '', text: '' })
 
     try {
-      let profilePictureUrl = user.user_metadata.profile_picture || ''
-
-      // Upload new profile image if selected
       if (profileImage) {
         try {
-          // Compress the image first
-          const processedImage = await processImage(profileImage)
-          
-          const fileExt = 'jpg' // We're converting all images to jpg in processImage
-          const filePath = `${user.id}/${Date.now()}.${fileExt}`
+          // Process and upload the profile image
+          const imageUrl = await processImage(
+            profileImage,
+            `profiles/${user.id}`  // Add the storage path parameter
+          )
 
-          // Delete old profile image if exists
-          if (profilePictureUrl && profilePictureUrl.includes('profile_images')) {
-            const oldPath = profilePictureUrl.split('/').pop()
-            if (oldPath) {
-              await supabase.storage
-                .from('profile_images')
-                .remove([`${user.id}/${oldPath}`])
+          // Update profile picture URL in user metadata
+          const { error: updateError } = await supabase.auth.updateUser({
+            data: {
+              ...user.user_metadata,
+              name,
+              phone,
+              bio,
+              profile_picture: imageUrl
             }
-          }
+          })
 
-          // Upload new image
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('profile_images')
-            .upload(filePath, processedImage, {
-              cacheControl: '3600',
-              upsert: true
-            })
+          if (updateError) throw updateError
 
-          if (uploadError) throw uploadError
-
-          // Get the public URL
-          const { data: { publicUrl } } = supabase.storage
-            .from('profile_images')
-            .getPublicUrl(filePath)
-
-          profilePictureUrl = publicUrl
+          setMessage({ type: 'success', text: 'Profile updated successfully!' })
         } catch (error) {
-          console.error('Error processing/uploading image:', error)
-          throw error
+          console.error('Error updating profile:', error)
+          setMessage({ type: 'error', text: 'Failed to update profile' })
+        }
+      } else {
+        // Update user metadata without changing profile picture
+        try {
+          const { error: updateError } = await supabase.auth.updateUser({
+            data: {
+              ...user.user_metadata,
+              name,
+              phone,
+              bio
+            }
+          })
+
+          if (updateError) throw updateError
+
+          setMessage({ type: 'success', text: 'Profile updated successfully!' })
+        } catch (error) {
+          console.error('Error updating profile:', error)
+          setMessage({ type: 'error', text: 'Failed to update profile' })
         }
       }
-
-      // Get user record ID first
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('id')
-        .eq('auth_user_id', user.id)
-        .single()
-
-      if (userError) throw userError
-
-      // Update users table with the same profile picture URL
-      const { error: updateUserError } = await supabase
-        .from('users')
-        .update({
-          name,
-          phone,
-          bio,
-          profile_picture: profilePictureUrl,
-          updated_at: new Date().toISOString()
-        })
-        .eq('auth_user_id', user.id)
-
-      if (updateUserError) throw updateUserError
-
-      // Update auth user metadata
-      const { error: updateAuthError } = await supabase.auth.updateUser({
-        data: {
-          name,
-          phone,
-          bio,
-          profile_picture: profilePictureUrl
-        }
-      })
-
-      if (updateAuthError) throw updateAuthError
-
-      setMessage({
-        type: 'success',
-        text: 'Profile updated successfully!'
-      })
     } catch (error) {
       console.error('Error updating profile:', error)
       setMessage({
